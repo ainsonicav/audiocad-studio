@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --port 5173 --host",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vite build && npx -y gh-pages -d dist -b gh-pages"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
