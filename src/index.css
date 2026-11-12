@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@layer base {
+  html,
+  body,
+  * {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    letter-spacing: -0.015em;
+  }
+
+  button,
+  th {
+    white-space: nowrap;
+  }
+
+  code,
+  pre,
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Pretendard', monospace;
+  }
+}
+
+/* Instant Dashboard Hover Tooltip Popup */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  background: rgba(9, 13, 22, 0.96);
+  color: #f1f5f9;
+  border: 1px solid rgba(34, 211, 238, 0.45);
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  z-index: 9999;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+[data-tooltip-pos="bottom"]::after {
+  bottom: auto;
+  top: calc(100% + 7px);
+  transform: translateX(-50%) translateY(-3px);
+}
+
+[data-tooltip-pos="bottom"]:hover::after {
+  transform: translateX(-50%) translateY(0);
+}
+
+[data-tooltip-pos="right"]::after {
+  bottom: auto;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+[data-tooltip-pos="right"]:hover::after {
+  transform: translateY(-50%);
+}
