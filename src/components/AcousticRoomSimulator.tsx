@@ -583,23 +583,26 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
   };
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-slate-950">
-      {/* LEFT ROOM & SPEAKER PLACEMENT INSPECTOR (Compact Dashboard Sidebar) */}
-      <aside className="w-72 shrink-0 border-r border-slate-800 bg-slate-900/90 flex flex-col overflow-y-auto p-2.5 space-y-2.5">
+    <div className="flex h-full w-full overflow-hidden bg-[#0B0F17] text-slate-100">
+      {/* LEFT ROOM & SPEAKER PLACEMENT CONTROL RAIL */}
+      <aside className="w-80 shrink-0 border-r border-white/[0.08] bg-[#111622] flex flex-col overflow-y-auto p-3.5 space-y-3.5">
         {/* Room Dimensions & Acoustic Target */}
-        <div className="rounded-lg border border-slate-800 bg-slate-950/90 p-2.5 space-y-2">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3.5 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
-              <Maximize2 className="w-3.5 h-3.5" /> 공간 규격
+            <h3 className="text-xs font-semibold text-slate-100 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-cyan-400/15 border border-cyan-400/25 flex items-center justify-center text-cyan-300">
+                <Maximize2 className="w-3.5 h-3.5" />
+              </span>
+              공간 규격
             </h3>
-            <span className="text-[10px] font-mono text-slate-400">
+            <span className="px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-[10px] font-mono text-slate-300">
               {(room.lengthMeters * room.widthMeters).toFixed(0)}㎡
             </span>
           </div>
 
-          <div className="grid grid-cols-3 gap-1.5 text-xs">
-            <label className="space-y-0.5" data-tooltip="무대~후방 공간 깊이(m)" data-tooltip-pos="bottom">
-              <span className="text-[10px] text-slate-400">깊이 L(m)</span>
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <label className="space-y-1" data-tooltip="무대~후방 공간 깊이(m)" data-tooltip-pos="bottom">
+              <span className="text-[10px] font-medium text-slate-400 block">깊이 L(m)</span>
               <input
                 type="number"
                 min={4}
@@ -607,11 +610,11 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                 step="0.1"
                 value={room.lengthMeters}
                 onChange={(e) => onUpdateRoom({ lengthMeters: Math.max(4, Number(e.target.value)) })}
-                className="w-full rounded bg-slate-900 border border-slate-700 px-1.5 py-1 font-mono text-cyan-300"
+                className="w-full rounded-xl bg-slate-900/90 border border-white/[0.1] focus:border-cyan-400/60 focus:outline-none px-2 py-1.5 font-mono text-cyan-300 transition-colors"
               />
             </label>
-            <label className="space-y-0.5" data-tooltip="좌~우 공간 가로폭(m)" data-tooltip-pos="bottom">
-              <span className="text-[10px] text-slate-400">폭 W(m)</span>
+            <label className="space-y-1" data-tooltip="좌~우 공간 가로폭(m)" data-tooltip-pos="bottom">
+              <span className="text-[10px] font-medium text-slate-400 block">폭 W(m)</span>
               <input
                 type="number"
                 min={3}
@@ -619,11 +622,11 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                 step="0.1"
                 value={room.widthMeters}
                 onChange={(e) => onUpdateRoom({ widthMeters: Math.max(3, Number(e.target.value)) })}
-                className="w-full rounded bg-slate-900 border border-slate-700 px-1.5 py-1 font-mono text-cyan-300"
+                className="w-full rounded-xl bg-slate-900/90 border border-white/[0.1] focus:border-cyan-400/60 focus:outline-none px-2 py-1.5 font-mono text-cyan-300 transition-colors"
               />
             </label>
-            <label className="space-y-0.5" data-tooltip="바닥~천장 높이(m)" data-tooltip-pos="bottom">
-              <span className="text-[10px] text-slate-400">천장 H(m)</span>
+            <label className="space-y-1" data-tooltip="바닥~천장 높이(m)" data-tooltip-pos="bottom">
+              <span className="text-[10px] font-medium text-slate-400 block">천장 H(m)</span>
               <input
                 type="number"
                 min={2.2}
@@ -633,14 +636,14 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                 onChange={(e) =>
                   onUpdateRoom({ heightMeters: Math.max(2.2, Number(e.target.value)) })
                 }
-                className="w-full rounded bg-slate-900 border border-slate-700 px-1.5 py-1 font-mono text-cyan-300"
+                className="w-full rounded-xl bg-slate-900/90 border border-white/[0.1] focus:border-cyan-400/60 focus:outline-none px-2 py-1.5 font-mono text-cyan-300 transition-colors"
               />
             </label>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5 text-xs">
-            <label className="space-y-0.5" data-tooltip="청취자 귀 높이 기준면(기본 1.2m)">
-              <span className="text-[10px] text-slate-400 whitespace-nowrap">귀높이(m)</span>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <label className="space-y-1" data-tooltip="청취자 귀 높이 기준면(기본 1.2m)">
+              <span className="text-[10px] font-medium text-slate-400 whitespace-nowrap block">귀높이(m)</span>
               <input
                 type="number"
                 min={0.8}
@@ -650,11 +653,11 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                 onChange={(e) =>
                   onUpdateRoom({ earHeightMeters: Math.max(0.8, Number(e.target.value)) })
                 }
-                className="w-full rounded bg-slate-900 border border-slate-700 px-1.5 py-1 font-mono text-slate-200"
+                className="w-full rounded-xl bg-slate-900/90 border border-white/[0.1] focus:border-cyan-400/60 focus:outline-none px-2 py-1.5 font-mono text-slate-200 transition-colors"
               />
             </label>
-            <label className="space-y-0.5" data-tooltip="실내 잔향시간 RT60(초) — 음성명료도(STI) 산출 반영">
-              <span className="text-[10px] text-slate-400 whitespace-nowrap">잔향 RT60(s)</span>
+            <label className="space-y-1" data-tooltip="실내 잔향시간 RT60(초) — 음성명료도(STI) 산출 반영">
+              <span className="text-[10px] font-medium text-slate-400 whitespace-nowrap block">잔향 RT60(s)</span>
               <input
                 type="number"
                 min={0.3}
@@ -664,18 +667,18 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                 onChange={(e) =>
                   onUpdateRoom({ rt60Seconds: Math.max(0.3, Number(e.target.value)) })
                 }
-                className="w-full rounded bg-slate-900 border border-slate-700 px-1.5 py-1 font-mono text-slate-200"
+                className="w-full rounded-xl bg-slate-900/90 border border-white/[0.1] focus:border-cyan-400/60 focus:outline-none px-2 py-1.5 font-mono text-slate-200 transition-colors"
               />
             </label>
           </div>
 
           {/* Architectural Floorplan Overlay Upload */}
-          <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-1.5">
+          <div className="pt-2 border-t border-white/[0.07] flex items-center justify-between gap-2">
             <label
               data-tooltip="건축 2D 평면도 이미지(PNG/JPG/SVG)를 배경으로 깔고 위에서 음압분포를 시뮬레이션합니다"
-              className="flex-1 text-center py-1 px-2 rounded border border-dashed border-slate-700 hover:border-cyan-500 text-[11px] text-slate-300 cursor-pointer bg-slate-900/50 transition flex items-center justify-center gap-1 whitespace-nowrap"
+              className="flex-1 text-center py-1.5 px-3 rounded-full border border-dashed border-white/[0.15] hover:border-cyan-400/60 hover:bg-cyan-400/5 text-[11px] font-medium text-slate-300 cursor-pointer bg-slate-900/60 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              <ImageIcon className="w-3 h-3 text-cyan-400" /> 배경도면 업로드
+              <ImageIcon className="w-3.5 h-3.5 text-cyan-400" /> 배경도면 업로드
               <input
                 type="file"
                 accept="image/*"
@@ -687,7 +690,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
               <button
                 onClick={() => onUpdateRoom({ floorplanImageUrl: undefined })}
                 data-tooltip="업로드한 배경 평면도 제거"
-                className="px-2 py-1 rounded bg-rose-500/20 text-[10px] text-rose-300 hover:bg-rose-500/30 whitespace-nowrap"
+                className="px-3 py-1.5 rounded-full bg-rose-500/15 border border-rose-400/30 text-[11px] font-medium text-rose-300 hover:bg-rose-500/25 transition-colors whitespace-nowrap"
               >
                 제거
               </button>
@@ -696,25 +699,30 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
         </div>
 
         {/* Selected Speaker Placement & Aiming Controls */}
-        <div className="rounded-lg border border-slate-800 bg-slate-950/90 p-2.5 space-y-2">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3.5 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-orange-400 flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5" /> 스피커 제어
+            <h3 className="text-xs font-semibold text-slate-100 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-orange-400/15 border border-orange-400/25 flex items-center justify-center text-orange-300">
+                <Compass className="w-3.5 h-3.5" />
+              </span>
+              스피커 제어
             </h3>
-            <span className="text-[10px] font-mono text-slate-400">{placements.length}EA</span>
+            <span className="px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-[10px] font-mono text-slate-300">
+              {placements.length}EA
+            </span>
           </div>
 
           {/* Speaker Selector Pills */}
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5">
             {placements.map((pl) => (
               <button
                 key={pl.id}
                 onClick={() => setSelectedPlacementId(pl.id)}
                 data-tooltip={`${pl.label} 선택 — 위치(X/Y/Z) 및 지향각 개별 조정`}
-                className={`px-2 py-0.5 rounded text-[10px] font-mono transition ${
+                className={`px-2.5 py-1 rounded-full text-[11px] font-mono transition-all ${
                   selectedPlacement?.id === pl.id
-                    ? 'bg-orange-500 text-slate-950 font-bold'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    ? 'bg-orange-400 text-slate-950 font-bold shadow-sm'
+                    : 'bg-white/[0.05] border border-white/[0.08] text-slate-300 hover:bg-white/[0.1]'
                 }`}
               >
                 {pl.label}
@@ -726,13 +734,13 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
             const spkProd = catalogMap.get(selectedPlacement.productId);
             const driveInfo = splSummary.speakerDriveMap[selectedPlacement.nodeId];
             return (
-              <div className="space-y-2 pt-1.5 border-t border-slate-800 text-xs">
+              <div className="space-y-2.5 pt-2.5 border-t border-white/[0.07] text-xs">
                 {/* Swap Speaker Model right inside the Acoustic Simulator! */}
                 <select
                   value={selectedPlacement.productId}
                   onChange={(e) => onSwapNodeProduct(selectedPlacement.nodeId, e.target.value)}
                   data-tooltip="스피커 모델 변경 (지향각·감도·음압·내역서 즉시 연동)"
-                  className="w-full rounded bg-slate-900 border border-orange-500/50 px-2 py-1 text-[11px] font-mono text-orange-200 focus:outline-none"
+                  className="w-full rounded-xl bg-slate-900/90 border border-orange-400/40 focus:border-orange-400 px-2.5 py-1.5 text-[11px] font-mono text-orange-200 focus:outline-none transition-colors"
                 >
                   {speakerCatalog.map((sp) => (
                     <option key={sp.id} value={sp.id}>
@@ -745,7 +753,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                 {driveInfo && (
                   <div
                     data-tooltip={`${driveInfo.sourceDescription} | 수평 ${spkProd?.speaker?.dispersionHorizontalDeg}° × 수직 ${spkProd?.speaker?.dispersionVerticalDeg}°`}
-                    className="rounded bg-slate-900/90 border border-slate-800 px-2 py-1 font-mono text-[10px] flex items-center justify-between"
+                    className="rounded-xl bg-white/[0.03] border border-white/[0.07] px-2.5 py-1.5 font-mono text-[10px] flex items-center justify-between"
                   >
                     <span className="text-slate-400">1m 최대출력</span>
                     <strong className="text-emerald-300">
@@ -754,9 +762,9 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                   </div>
                 )}
 
-                <div className="grid grid-cols-3 gap-1.5">
-                  <label className="space-y-0.5" data-tooltip="전후 거리 X좌표(m)">
-                    <span className="text-[10px] text-slate-400">X(m)</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <label className="space-y-1" data-tooltip="전후 거리 X좌표(m)">
+                    <span className="text-[10px] font-medium text-slate-400 block">X(m)</span>
                     <input
                       type="number"
                       step="0.1"
@@ -768,11 +776,11 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                           xMeters: Number(e.target.value),
                         })
                       }
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-1.5 py-0.5 font-mono text-slate-200"
+                      className="w-full rounded-xl bg-slate-900/90 border border-white/[0.1] focus:border-cyan-400/60 focus:outline-none px-2 py-1 font-mono text-slate-200"
                     />
                   </label>
-                  <label className="space-y-0.5" data-tooltip="좌우 폭 Y좌표(m)">
-                    <span className="text-[10px] text-slate-400">Y(m)</span>
+                  <label className="space-y-1" data-tooltip="좌우 폭 Y좌표(m)">
+                    <span className="text-[10px] font-medium text-slate-400 block">Y(m)</span>
                     <input
                       type="number"
                       step="0.1"
@@ -784,11 +792,11 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                           yMeters: Number(e.target.value),
                         })
                       }
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-1.5 py-0.5 font-mono text-slate-200"
+                      className="w-full rounded-xl bg-slate-900/90 border border-white/[0.1] focus:border-cyan-400/60 focus:outline-none px-2 py-1 font-mono text-slate-200"
                     />
                   </label>
-                  <label className="space-y-0.5" data-tooltip="바닥으로부터 설치 높이 Z(m)">
-                    <span className="text-[10px] text-slate-400">높이 Z(m)</span>
+                  <label className="space-y-1" data-tooltip="바닥으로부터 설치 높이 Z(m)">
+                    <span className="text-[10px] font-medium text-slate-400 block">높이 Z(m)</span>
                     <input
                       type="number"
                       step="0.1"
@@ -800,15 +808,15 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                           zHeightMeters: Number(e.target.value),
                         })
                       }
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-1.5 py-0.5 font-mono text-slate-200"
+                      className="w-full rounded-xl bg-slate-900/90 border border-white/[0.1] focus:border-cyan-400/60 focus:outline-none px-2 py-1 font-mono text-slate-200"
                     />
                   </label>
                 </div>
 
                 {/* Aiming Azimuth & Vertical Tilt Sliders */}
-                <div className="space-y-1.5 pt-0.5">
+                <div className="space-y-2 pt-1">
                   <label className="block" data-tooltip="수평 지향 회전각 (-90° 좌측 ~ +90° 우측)">
-                    <div className="flex justify-between text-[10px]">
+                    <div className="flex justify-between text-[10px] mb-1">
                       <span className="text-slate-400">수평 방위각(Pan)</span>
                       <span className="font-mono text-cyan-300">{selectedPlacement.azimuthDeg}°</span>
                     </div>
@@ -823,12 +831,12 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                           azimuthDeg: Number(e.target.value),
                         })
                       }
-                      className="w-full accent-cyan-400 h-1.5"
+                      className="w-full accent-cyan-400 h-1.5 cursor-pointer"
                     />
                   </label>
 
                   <label className="block" data-tooltip="수직 하향 틸트각 (0° 정면 ~ 90° 수직하향)">
-                    <div className="flex justify-between text-[10px]">
+                    <div className="flex justify-between text-[10px] mb-1">
                       <span className="text-slate-400">수직 틸트각(Tilt)</span>
                       <span className="font-mono text-orange-300">{selectedPlacement.tiltDownDeg}°</span>
                     </div>
@@ -843,7 +851,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                           tiltDownDeg: Number(e.target.value),
                         })
                       }
-                      className="w-full accent-orange-400 h-1.5"
+                      className="w-full accent-orange-400 h-1.5 cursor-pointer"
                     />
                   </label>
                 </div>
@@ -855,10 +863,10 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                     })
                   }
                   data-tooltip="개별 스피커 출력 ON/OFF 전환 (음압 분포 비교 테스트용)"
-                  className={`w-full py-1 rounded text-[11px] font-semibold flex items-center justify-center gap-1.5 transition ${
+                  className={`w-full py-1.5 rounded-full text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors ${
                     selectedPlacement.muted
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                      : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                      ? 'bg-rose-500/15 text-rose-300 border border-rose-400/35 hover:bg-rose-500/25'
+                      : 'bg-white/[0.06] border border-white/[0.1] text-slate-200 hover:bg-white/[0.1]'
                   }`}
                 >
                   {selectedPlacement.muted ? (
@@ -875,97 +883,102 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
             );
           })()}
         </div>
+      </aside>
 
-        {/* Acoustic Performance Metrics Summary Card */}
-        <div className="rounded-lg border border-slate-800 bg-slate-950/90 p-2.5 space-y-1.5">
-          <h3 className="text-xs font-bold text-emerald-400">음향 핵심지표</h3>
-          <div className="grid grid-cols-2 gap-1.5 font-mono">
+      {/* MAIN ACOUSTIC SIMULATION VIEWPORT (KPI STRIP + ADVISOR + TOP-VIEW + SIDE-VIEW) */}
+      <div className="flex-1 flex flex-col overflow-y-auto p-4 space-y-3.5">
+        {/* CRISP MATERIAL 3 TONAL KPI / METRIC CARDS */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 font-mono">
+          <div
+            data-tooltip={`객석 최소 ${splSummary.minSplDb}dB ~ 최대 ${splSummary.maxSplDb}dB`}
+            data-tooltip-pos="bottom"
+            className="rounded-2xl border border-white/[0.08] bg-[#161C2B] px-3.5 py-2.5 hover:border-sky-400/40 transition-colors"
+          >
+            <div className="text-[10px] font-sans font-medium text-slate-400">평균음압</div>
+            <div className="text-base font-bold text-sky-300 mt-0.5">{splSummary.avgSplDb} dB</div>
+          </div>
+          <div
+            data-tooltip={`최대·최소 음압 편차 ±${splSummary.uniformityPlusMinusDb}dB`}
+            data-tooltip-pos="bottom"
+            className="rounded-2xl border border-white/[0.08] bg-[#161C2B] px-3.5 py-2.5 hover:border-sky-400/40 transition-colors"
+          >
+            <div className="text-[10px] font-sans font-medium text-slate-400">음압편차</div>
             <div
-              data-tooltip={`객석 최소 ${splSummary.minSplDb}dB ~ 최대 ${splSummary.maxSplDb}dB`}
-              className="rounded bg-slate-900 p-2 border border-slate-800"
+              className={`text-base font-bold mt-0.5 ${
+                isUniMet ? 'text-emerald-400' : 'text-amber-400'
+              }`}
             >
-              <div className="text-[10px] text-slate-400">평균음압</div>
-              <div className="text-sm font-bold text-cyan-300">{splSummary.avgSplDb} dB</div>
+              ±{splSummary.uniformityPlusMinusDb} dB
             </div>
-            <div
-              data-tooltip={`최대·최소 음압 편차 ±${splSummary.uniformityPlusMinusDb}dB`}
-              className="rounded bg-slate-900 p-2 border border-slate-800"
-            >
-              <div className="text-[10px] text-slate-400">음압편차</div>
-              <div
-                className={`text-sm font-bold ${
-                  isUniMet ? 'text-emerald-400' : 'text-amber-400'
-                }`}
-              >
-                ±{splSummary.uniformityPlusMinusDb} dB
-              </div>
+          </div>
+          <div
+            data-tooltip="음성명료도 지수 (0.60 이상 양호, 0.75 이상 우수)"
+            data-tooltip-pos="bottom"
+            className="rounded-2xl border border-white/[0.08] bg-[#161C2B] px-3.5 py-2.5 hover:border-sky-400/40 transition-colors"
+          >
+            <div className="text-[10px] font-sans font-medium text-slate-400">명료도(STI)</div>
+            <div className="text-sm font-bold text-emerald-300 mt-1">
+              {splSummary.estimatedSti} <span className="text-[11px] font-normal text-slate-400">({splSummary.stiGrade})</span>
             </div>
+          </div>
+          <div
+            data-tooltip={`목표 음압 도달 비율 ${splSummary.targetCoveragePercent}% (사각지대 ${splSummary.deadSpotPercent}%)`}
+            data-tooltip-pos="bottom"
+            className="rounded-2xl border border-white/[0.08] bg-[#161C2B] px-3.5 py-2.5 hover:border-sky-400/40 transition-colors"
+          >
+            <div className="text-[10px] font-sans font-medium text-slate-400">커버리지</div>
             <div
-              data-tooltip="음성명료도 지수 (0.60 이상 양호, 0.75 이상 우수)"
-              className="rounded bg-slate-900 p-2 border border-slate-800"
+              className={`text-base font-bold mt-0.5 ${
+                splSummary.targetCoveragePercent >= 80 ? 'text-emerald-400' : 'text-amber-400'
+              }`}
             >
-              <div className="text-[10px] text-slate-400">명료도(STI)</div>
-              <div className="text-xs font-bold text-emerald-300">
-                {splSummary.estimatedSti} ({splSummary.stiGrade})
-              </div>
+              {splSummary.targetCoveragePercent}%
             </div>
-            <div
-              data-tooltip={`목표 음압 도달 비율 ${splSummary.targetCoveragePercent}% (사각지대 ${splSummary.deadSpotPercent}%)`}
-              className="rounded bg-slate-900 p-2 border border-slate-800"
-            >
-              <div className="text-[10px] text-slate-400">커버리지</div>
-              <div
-                className={`text-xs font-bold ${
-                  splSummary.targetCoveragePercent >= 80 ? 'text-emerald-400' : 'text-amber-400'
-                }`}
-              >
-                {splSummary.targetCoveragePercent}%
-              </div>
+          </div>
+          <div
+            data-tooltip="2대 이상 스피커가 6dB 이내 음압 차이로 동시 도달하는 소리 중첩 구역 비율"
+            data-tooltip-pos="bottom"
+            className="rounded-2xl border border-white/[0.08] bg-[#161C2B] px-3.5 py-2.5 hover:border-sky-400/40 transition-colors"
+          >
+            <div className="text-[10px] font-sans font-medium text-slate-400">중첩구역</div>
+            <div className="text-base font-bold text-amber-300 mt-0.5">
+              {splSummary.overlapZonePercent ?? 0}%
             </div>
-            <div
-              data-tooltip="2대 이상 스피커가 6dB 이내 음압 차이로 동시 도달하는 소리 중첩 구역 비율"
-              className="rounded bg-slate-900 p-2 border border-slate-800"
-            >
-              <div className="text-[10px] text-slate-400">중첩구역</div>
-              <div className="text-xs font-bold text-amber-300">
-                {splSummary.overlapZonePercent ?? 0}%
-              </div>
-            </div>
-            <div
-              data-tooltip={`위상 동상 보강(▲부스트 +${splSummary.maxBoostDeltaDb ?? 0}dB) / 역상 상쇄(▼딥 ${splSummary.maxDipDeltaDb ?? 0}dB)`}
-              className="rounded bg-slate-900 p-2 border border-slate-800"
-            >
-              <div className="text-[10px] text-slate-400">부스트 / 딥</div>
-              <div className="text-[11px] font-bold">
-                <span className="text-rose-400">+{splSummary.maxBoostDeltaDb ?? 0}</span>
-                <span className="text-slate-500"> / </span>
-                <span className="text-cyan-400">{splSummary.maxDipDeltaDb ?? 0}dB</span>
-              </div>
+          </div>
+          <div
+            data-tooltip={`위상 동상 보강(▲부스트 +${splSummary.maxBoostDeltaDb ?? 0}dB) / 역상 상쇄(▼딥 ${splSummary.maxDipDeltaDb ?? 0}dB)`}
+            data-tooltip-pos="bottom"
+            className="rounded-2xl border border-white/[0.08] bg-[#161C2B] px-3.5 py-2.5 hover:border-sky-400/40 transition-colors"
+          >
+            <div className="text-[10px] font-sans font-medium text-slate-400">부스트 / 딥</div>
+            <div className="text-sm font-bold mt-1">
+              <span className="text-rose-400">+{splSummary.maxBoostDeltaDb ?? 0}</span>
+              <span className="text-slate-500"> / </span>
+              <span className="text-sky-400">{splSummary.maxDipDeltaDb ?? 0}dB</span>
             </div>
           </div>
         </div>
-      </aside>
 
-      {/* MAIN ACOUSTIC SIMULATION VIEWPORT (COMPACT ADVISOR + TOP-VIEW + SIDE-VIEW) */}
-      <div className="flex-1 flex flex-col overflow-y-auto p-3 space-y-3">
-        {/* GOAL-DRIVEN ACOUSTIC MODIFICATION ADVISOR (간결한 대시보드형 목표기준 + 수정제안) */}
-        <div className="rounded-xl border border-cyan-500/40 bg-slate-900/95 p-3 shadow-lg space-y-2.5">
+        {/* GOAL-DRIVEN ACOUSTIC MODIFICATION ADVISOR */}
+        <div className="rounded-2xl border border-sky-400/25 bg-[#161C2B] p-3.5 space-y-3">
           {/* Single-Line Header + Target Criteria Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <span
                 data-tooltip="목표 평균음압(dB)과 허용 편차(±dB)를 지정하면 보유 장비 DB 안에서 즉시 적용 가능한 4가지 솔루션을 산출합니다"
                 data-tooltip-pos="bottom"
-                className="flex items-center gap-1.5 text-xs font-bold text-white whitespace-nowrap cursor-help"
+                className="flex items-center gap-2 text-xs font-semibold text-slate-100 whitespace-nowrap cursor-help"
               >
-                <Sparkles className="w-4 h-4 text-cyan-400" />
+                <span className="w-6 h-6 rounded-lg bg-cyan-400/15 border border-cyan-400/25 flex items-center justify-center text-cyan-300">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </span>
                 목표기준 맞춤설계
               </span>
               <span
-                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold whitespace-nowrap ${
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold whitespace-nowrap border ${
                   isSplMet && isUniMet
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                    : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    ? 'bg-emerald-400/15 text-emerald-300 border-emerald-400/30'
+                    : 'bg-amber-400/15 text-amber-300 border-amber-400/30'
                 }`}
               >
                 {isSplMet && isUniMet
@@ -979,23 +992,23 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
             </div>
 
             {/* Compact Target Inputs & Quick Presets */}
-            <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
+            <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono">
               {/* Target Average SPL */}
               <div
                 data-tooltip="목표 객석 평균음압(dB) 기준 설정"
                 data-tooltip-pos="bottom"
-                className="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded border border-slate-800"
+                className="flex items-center gap-1 bg-slate-950/80 px-2 py-1 rounded-full border border-white/[0.08]"
               >
-                <span className="text-[11px] text-emerald-300 font-bold">목표음압</span>
+                <span className="text-[11px] font-sans text-emerald-300 font-semibold px-1">목표음압</span>
                 {[86, 92, 95, 99].map((val) => (
                   <button
                     key={val}
                     type="button"
                     onClick={() => onUpdateRoom({ targetSplDb: val })}
-                    className={`px-1.5 py-0.5 rounded text-[10px] transition ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] transition-colors ${
                       room.targetSplDb === val
-                        ? 'bg-emerald-500 text-slate-950 font-bold'
-                        : 'bg-slate-800 text-slate-400 hover:text-white'
+                        ? 'bg-emerald-400 text-slate-950 font-bold'
+                        : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
                     }`}
                   >
                     {val}
@@ -1009,27 +1022,27 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                   onChange={(e) =>
                     onUpdateRoom({ targetSplDb: Math.max(72, Number(e.target.value)) })
                   }
-                  className="w-12 rounded bg-slate-900 border border-emerald-500/50 px-1 py-0.5 text-xs font-bold text-emerald-300 text-right"
+                  className="w-12 rounded-full bg-slate-900 border border-emerald-400/40 px-1.5 py-0.5 text-xs font-bold text-emerald-300 text-right focus:outline-none"
                 />
-                <span className="text-[10px] text-slate-400">dB</span>
+                <span className="text-[10px] text-slate-400 pr-1">dB</span>
               </div>
 
               {/* Target Uniformity Deviation */}
               <div
                 data-tooltip="목표 공간 음압편차(±dB 이내) 기준 설정"
                 data-tooltip-pos="bottom"
-                className="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded border border-slate-800"
+                className="flex items-center gap-1 bg-slate-950/80 px-2 py-1 rounded-full border border-white/[0.08]"
               >
-                <span className="text-[11px] text-amber-300 font-bold">목표편차</span>
+                <span className="text-[11px] font-sans text-amber-300 font-semibold px-1">목표편차</span>
                 {[2.0, 3.0, 4.0].map((val) => (
                   <button
                     key={val}
                     type="button"
                     onClick={() => onUpdateRoom({ targetUniformityDb: val })}
-                    className={`px-1.5 py-0.5 rounded text-[10px] transition ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] transition-colors ${
                       targetUni === val
                         ? 'bg-amber-400 text-slate-950 font-bold'
-                        : 'bg-slate-800 text-slate-400 hover:text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
                     }`}
                   >
                     ±{val}
@@ -1044,16 +1057,16 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                   onChange={(e) =>
                     onUpdateRoom({ targetUniformityDb: Math.max(1.0, Number(e.target.value)) })
                   }
-                  className="w-12 rounded bg-slate-900 border border-amber-500/50 px-1 py-0.5 text-xs font-bold text-amber-300 text-right"
+                  className="w-12 rounded-full bg-slate-900 border border-amber-400/40 px-1.5 py-0.5 text-xs font-bold text-amber-300 text-right focus:outline-none"
                 />
-                <span className="text-[10px] text-slate-400">dB</span>
+                <span className="text-[10px] text-slate-400 pr-1">dB</span>
               </div>
 
               <button
                 onClick={() => setShowAdvisorPanel((v) => !v)}
                 data-tooltip="자동 수정제안 카드 접기/펼치기"
                 data-tooltip-pos="bottom"
-                className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 font-sans whitespace-nowrap"
+                className="px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-[11px] text-slate-200 font-sans whitespace-nowrap transition-colors"
               >
                 {showAdvisorPanel ? '접기 ▲' : `제안(${proposals.length}) ▼`}
               </button>
@@ -1061,7 +1074,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
           </div>
 
           {appliedProposalBanner && (
-            <div className="rounded bg-emerald-500/15 border border-emerald-500/40 px-2.5 py-1 text-[11px] text-emerald-200 flex items-center justify-between">
+            <div className="rounded-xl bg-emerald-400/10 border border-emerald-400/30 px-3 py-1.5 text-[11px] text-emerald-200 flex items-center justify-between">
               <span className="flex items-center gap-1.5 font-medium truncate">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 {appliedProposalBanner}
@@ -1077,16 +1090,16 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
 
           {/* 4 Compact Dashboard Proposal Cards in a Single 4-Column Row (Details in Hover Tooltip) */}
           {showAdvisorPanel && (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5">
               {proposals.map((prop) => {
                 const badgeColor =
                   prop.category === 'reposition'
-                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                    ? 'bg-cyan-400/15 text-cyan-300 border-cyan-400/30'
                     : prop.category === 'swap_model'
-                    ? 'bg-orange-500/20 text-orange-300 border-orange-500/40'
+                    ? 'bg-orange-400/15 text-orange-300 border-orange-400/30'
                     : prop.category === 'add_speakers'
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                    : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+                    ? 'bg-amber-400/15 text-amber-300 border-amber-400/30'
+                    : 'bg-emerald-400/15 text-emerald-300 border-emerald-400/30';
 
                 const tooltipDetail = `${prop.description} | 조치: ${prop.actionBullets.join(' / ')}`;
 
@@ -1095,11 +1108,11 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                     key={prop.id}
                     data-tooltip={tooltipDetail}
                     data-tooltip-pos="bottom"
-                    className="rounded-lg border border-slate-800 hover:border-cyan-500/60 bg-slate-950/90 p-2.5 flex flex-col justify-between gap-2 transition"
+                    className="rounded-2xl border border-white/[0.08] hover:border-cyan-400/45 bg-slate-950/65 p-3 flex flex-col justify-between gap-2.5 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-1">
                       <span
-                        className={`px-1.5 py-0.5 rounded border text-[10px] font-mono font-bold whitespace-nowrap ${badgeColor}`}
+                        className={`px-2 py-0.5 rounded-full border text-[10px] font-mono font-semibold whitespace-nowrap ${badgeColor}`}
                       >
                         {prop.badgeLabel}
                       </span>
@@ -1120,9 +1133,9 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                       </span>
                     </div>
 
-                    <div className="text-xs font-bold text-slate-100 truncate">{prop.title}</div>
+                    <div className="text-xs font-semibold text-slate-100 truncate">{prop.title}</div>
 
-                    <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-slate-800/80">
+                    <div className="flex items-center justify-between gap-1 pt-2 border-t border-white/[0.07]">
                       <div className="text-[10px] font-mono space-y-0.5">
                         <div>
                           <span className="text-slate-500">음압 </span>
@@ -1158,7 +1171,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                             `[${prop.badgeLabel}] ${prop.title} 적용 완료 (평균 ${prop.afterAvgSplDb}dB / 편차 ±${prop.afterUniformityDb}dB)`
                           );
                         }}
-                        className="px-2.5 py-1.5 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-[11px] font-bold flex items-center gap-1 shadow whitespace-nowrap transition"
+                        className="px-3 py-1.5 rounded-full bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-[11px] font-bold flex items-center gap-1 shadow-sm whitespace-nowrap transition-colors"
                       >
                         <Zap className="w-3 h-3" /> 적용
                       </button>
@@ -1171,7 +1184,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
         </div>
 
         {/* Top Control Bar & Color Scale Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#161C2B] border border-white/[0.08] rounded-2xl px-4 py-2">
           <div className="flex flex-wrap items-center gap-3 text-xs">
             <label
               data-tooltip="스피커별 수평 -6dB 지향각 부채꼴 표시/숨김"
@@ -1213,9 +1226,9 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
             {/* Acoustic Frequency Band Selector */}
             <div
               data-tooltip="주파수 대역별 파장(λ=c/f) 및 지향각 변화에 따른 부스트·딥 간섭 패턴 시뮬레이션"
-              className="flex items-center gap-1 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800 font-mono text-[10px]"
+              className="flex items-center gap-1 bg-slate-950/80 px-1.5 py-0.5 rounded-full border border-white/[0.08] font-mono text-[10px]"
             >
-              <span className="text-slate-400 px-1">대역</span>
+              <span className="text-slate-400 px-1.5 font-sans">대역</span>
               {(
                 [
                   { id: 'broadband', label: '전대역' },
@@ -1228,10 +1241,10 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                   key={String(b.id)}
                   type="button"
                   onClick={() => setAnalysisBand(b.id)}
-                  className={`px-1.5 py-0.5 rounded transition ${
+                  className={`px-2 py-0.5 rounded-full transition-colors ${
                     analysisBand === b.id
-                      ? 'bg-cyan-500 text-slate-950 font-bold'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-cyan-400 text-slate-950 font-bold'
+                      : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
                   }`}
                 >
                   {b.label}
@@ -1245,7 +1258,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
             <span className="text-slate-400">SPL:</span>
             <span className="text-blue-400">70dB</span>
             <div
-              className="w-36 h-2.5 rounded border border-slate-700"
+              className="w-36 h-2.5 rounded-full border border-white/[0.12]"
               style={{
                 background:
                   'linear-gradient(90deg, #1d4ed8 0%, #06b6d4 28%, #22c55e 54%, #eab308 78%, #ef4444 100%)',
@@ -1256,50 +1269,50 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
         </div>
 
         {/* 1. TOP-VIEW HORIZONTAL SPL COVERAGE MAP */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3 flex flex-col">
-          <div className="flex items-center justify-between h-7 mb-1.5">
-            <div className="flex items-center gap-2">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3.5 flex flex-col">
+          <div className="flex flex-wrap items-center justify-between gap-2 min-h-7 mb-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span
                 data-tooltip="스피커 아이콘을 드래그하여 위치를 이동하면 공간 음압이 실시간 재계산됩니다"
-                className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold cursor-help"
+                className="px-2.5 py-0.5 rounded-full bg-cyan-400/15 border border-cyan-400/30 text-cyan-300 font-mono text-xs font-semibold cursor-help"
               >
                 평면도(TOP VIEW)
               </span>
-              <span className="text-xs font-semibold text-slate-200">
+              <span className="text-xs font-medium text-slate-200">
                 청취높이 Z={room.earHeightMeters}m
               </span>
               <span
                 data-tooltip="구면파 거리감쇠(-20log d, 라인어레이 근거리 -10log d) + 360° 지향성 폴라패턴 + 복소수 위상합성(Phasor Sum) 적용"
-                className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800/90 border border-slate-700 text-[10px] font-mono text-slate-300 cursor-help"
+                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-mono text-slate-300 cursor-help"
               >
                 이론검증: 역자승법칙(-6dB/2배거리) · 지향성 Q · 위상간섭
               </span>
             </div>
             <div className="h-6 flex items-center">
               {hoverProbe ? (
-                <div className="px-2.5 py-0.5 rounded bg-slate-950 border border-cyan-500/50 font-mono text-xs text-cyan-300 whitespace-nowrap flex items-center gap-2">
+                <div className="px-3 py-0.5 rounded-full bg-slate-950/90 border border-cyan-400/40 font-mono text-xs text-cyan-300 whitespace-nowrap flex items-center gap-2">
                   <span>
                     ({hoverProbe.xMeters.toFixed(1)}m, {hoverProbe.yMeters.toFixed(1)}m){' '}
                     <strong className="text-white">{hoverProbe.splDb.toFixed(1)} dB</strong>
                   </span>
                   {hoverProbe.overlapCount >= 2 && (
-                    <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[10px]">
+                    <span className="px-1.5 py-0.2 rounded-full bg-amber-400/15 text-amber-300 text-[10px]">
                       중첩 {hoverProbe.overlapCount}대
                     </span>
                   )}
                   {showInterference && hoverProbe.state === 'boost' && (
-                    <span className="px-1.5 py-0.2 rounded bg-rose-500/25 text-rose-300 text-[10px] font-bold">
+                    <span className="px-1.5 py-0.2 rounded-full bg-rose-400/20 text-rose-300 text-[10px] font-bold">
                       ▲부스트 +{hoverProbe.interferenceDeltaDb.toFixed(1)}dB
                     </span>
                   )}
                   {showInterference && hoverProbe.state === 'dip' && (
-                    <span className="px-1.5 py-0.2 rounded bg-cyan-500/25 text-cyan-300 text-[10px] font-bold">
+                    <span className="px-1.5 py-0.2 rounded-full bg-cyan-400/20 text-cyan-300 text-[10px] font-bold">
                       ▼딥 {hoverProbe.interferenceDeltaDb.toFixed(1)}dB
                     </span>
                   )}
                 </div>
               ) : (
-                <div className="px-2.5 py-0.5 rounded bg-slate-950/50 border border-slate-800 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                <div className="px-3 py-0.5 rounded-full bg-slate-950/50 border border-white/[0.06] font-mono text-[11px] text-slate-500 whitespace-nowrap">
                   도면 위 마우스 이동 시 지점 음압(dB) · 중첩 · 부스트/딥 표시
                 </div>
               )}
@@ -1307,7 +1320,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
           </div>
 
           {/* Interactive Aspect-Ratio Preserved Room Box */}
-          <div className="flex justify-center items-center py-2">
+          <div className="flex justify-center items-center py-1.5">
             <div
               onMouseMove={handleTopViewMouseMove}
               onMouseUp={() => setDraggingSpkId(null)}
@@ -1321,7 +1334,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                 aspectRatio: `${room.lengthMeters} / ${room.widthMeters}`,
                 maxHeight: 430,
               }}
-              className="relative rounded-lg overflow-hidden border-2 border-slate-700 bg-slate-950 shadow-2xl select-none"
+              className="relative rounded-xl overflow-hidden border border-white/[0.12] bg-slate-950 shadow-2xl select-none"
             >
               {/* Optional Uploaded Architectural Floorplan Image */}
               {room.floorplanImageUrl && (
@@ -1620,7 +1633,7 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
               })}
 
               {/* Dimension Rulers */}
-              <div className="absolute bottom-1 right-2 px-2 py-0.5 rounded bg-slate-950/80 text-[10px] font-mono text-slate-300 pointer-events-none whitespace-nowrap">
+              <div className="absolute bottom-1.5 right-2 px-2.5 py-0.5 rounded-full bg-slate-950/85 border border-white/[0.08] text-[10px] font-mono text-slate-300 pointer-events-none whitespace-nowrap">
                 깊이 {room.lengthMeters}m×폭 {room.widthMeters}m(면적 {(room.lengthMeters * room.widthMeters).toFixed(1)}㎡)
               </div>
             </div>
@@ -1628,22 +1641,22 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
         </div>
 
         {/* 2. SIDE-VIEW VERTICAL ELEVATION CROSS-SECTION */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <span
                 data-tooltip="설치 높이(Z) 및 수직 지향각·하향 틸트각에 따른 종단면 음압 투사도"
-                className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-xs font-bold cursor-help"
+                className="px-2.5 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 font-mono text-xs font-semibold cursor-help"
               >
                 종단면도(SIDE VIEW)
               </span>
-              <span className="text-xs font-semibold text-slate-200">
+              <span className="text-xs font-medium text-slate-200">
                 수직지향 {selectedPlacement ? catalogMap.get(selectedPlacement.productId)?.speaker?.dispersionVerticalDeg : 60}°V
               </span>
             </div>
             <label
               data-tooltip="평면도 상의 Y축 단면 기준선 위치를 이동합니다"
-              className="flex items-center gap-2 text-xs text-slate-300 font-mono whitespace-nowrap"
+              className="flex items-center gap-2 text-xs text-slate-300 font-mono whitespace-nowrap bg-slate-950/70 px-3 py-1 rounded-full border border-white/[0.08]"
             >
               단면 Y:
               <input
@@ -1655,21 +1668,21 @@ export const AcousticRoomSimulator: React.FC<AcousticRoomSimulatorProps> = ({
                 onChange={(e) =>
                   onUpdateRoom({ sideViewSliceYMeters: Number(e.target.value) })
                 }
-                className="w-24 accent-amber-400 h-1.5"
+                className="w-24 accent-amber-400 h-1.5 cursor-pointer"
               />
               <span className="text-amber-300">{room.sideViewSliceYMeters}m</span>
             </label>
           </div>
 
           <div className="flex justify-center">
-            <div className="w-full max-w-[880px] h-44 relative rounded-lg overflow-hidden border border-slate-700 bg-slate-950">
+            <div className="w-full max-w-[880px] h-44 relative rounded-xl overflow-hidden border border-white/[0.12] bg-slate-950">
               <canvas
                 ref={sideCanvasRef}
                 width={880}
                 height={180}
                 className="w-full h-full block"
               />
-              <div className="absolute top-1.5 right-2 px-2 py-0.5 rounded bg-slate-950/80 text-[10px] font-mono text-slate-300 whitespace-nowrap">
+              <div className="absolute top-2 right-2 px-2.5 py-0.5 rounded-full bg-slate-950/85 border border-white/[0.08] text-[10px] font-mono text-slate-300 whitespace-nowrap">
                 천장고 {room.heightMeters}m / 청취귀높이 {room.earHeightMeters}m
               </div>
             </div>

@@ -548,29 +548,33 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl max-h-[92vh] rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl flex flex-col overflow-hidden break-keep">
+    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="w-full max-w-5xl max-h-[92vh] rounded-2xl border border-white/[0.1] bg-[#161C2B] shadow-2xl shadow-black/60 flex flex-col overflow-hidden break-keep">
         {/* Header */}
-        <div className="px-5 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-950">
-          <div className="flex items-center gap-2">
-            <Database className="w-4 h-4 text-cyan-400" />
-            <h2 className="text-sm font-bold text-white break-keep">
-              장비 DB 카탈로그 관리
-            </h2>
-            <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono text-[10px] font-bold">
-              브랜드 카탈로그 자동분석 · 4대 총판 연동
-            </span>
+        <div className="px-6 py-4 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3 bg-[#111622]">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-sky-400/12 border border-sky-400/25 flex items-center justify-center shrink-0">
+              <Database className="w-4 h-4 text-sky-400" />
+            </div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h2 className="text-sm font-semibold text-white break-keep tracking-tight">
+                장비 DB 카탈로그 관리
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full bg-sky-400/12 border border-sky-400/25 text-sky-300 font-mono text-[10px] font-semibold">
+                브랜드 카탈로그 자동분석 · 4대 총판 연동
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Mode Switching Tabs */}
-            <div className="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-800 text-xs">
+          <div className="flex items-center gap-2.5">
+            {/* Mode Switching Pill Tabs */}
+            <div className="inline-flex rounded-full bg-[#0B0F17] p-1 border border-white/[0.08] text-xs">
               <button
                 type="button"
                 onClick={() => setModalMode('upload')}
-                className={`px-3 py-1 rounded-md font-bold transition flex items-center gap-1.5 ${
+                className={`px-3.5 py-1.5 rounded-full font-semibold transition flex items-center gap-1.5 ${
                   modalMode === 'upload'
-                    ? 'bg-cyan-500 text-slate-950 shadow'
+                    ? 'bg-sky-400 text-slate-950 shadow-sm'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
@@ -579,9 +583,9 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
               <button
                 type="button"
                 onClick={() => setModalMode('manual')}
-                className={`px-3 py-1 rounded-md font-bold transition flex items-center gap-1.5 ${
+                className={`px-3.5 py-1.5 rounded-full font-semibold transition flex items-center gap-1.5 ${
                   modalMode === 'manual'
-                    ? 'bg-cyan-500 text-slate-950 shadow'
+                    ? 'bg-sky-400 text-slate-950 shadow-sm'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
@@ -590,10 +594,11 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
             </div>
 
             <button
+              type="button"
               onClick={onClose}
               data-tooltip="닫기"
               data-tooltip-pos="bottom"
-              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+              className="p-2 rounded-full bg-[#1E2638] hover:bg-white/[0.12] border border-white/[0.08] text-slate-300 hover:text-white transition"
             >
               <X className="w-4 h-4" />
             </button>
@@ -604,13 +609,13 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
             MODE 1: BRAND CATALOG FILE / TEXT UPLOAD & AI AUTO SPEC PARSER
            ========================================================================= */}
         {modalMode === 'upload' && (
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0B0F17]/40">
             {/* Top Explanation & Brand Override Input */}
-            <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-3">
+            <div className="rounded-2xl border border-sky-400/25 bg-sky-400/[0.06] p-4 space-y-3">
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-cyan-300 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-cyan-400" />
+                  <h3 className="text-sm font-semibold text-sky-300 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-sky-400" />
                     브랜드 카탈로그 업로드 및 음향 사양 자동 파악
                   </h3>
                   <p className="text-xs text-slate-300 leading-relaxed">
@@ -620,30 +625,30 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 font-bold whitespace-nowrap">브랜드 지정:</span>
+                  <span className="text-xs text-slate-400 font-medium whitespace-nowrap">브랜드 지정:</span>
                   <input
                     type="text"
                     value={forcedBrand}
                     onChange={(e) => setForcedBrand(e.target.value)}
                     placeholder="비워둘 시 파일에서 자동 감지 (예: JBL, Crown...)"
-                    className="w-56 rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1 text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
+                    className="w-56 rounded-xl bg-[#0B0F17] border border-white/[0.12] px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-sky-400/70 focus:outline-none transition"
                   />
                 </div>
               </div>
 
               {/* Supported Format Badges */}
-              <div className="flex items-center gap-2 pt-1 border-t border-cyan-500/20 text-[11px] font-mono text-cyan-400/90 flex-wrap">
+              <div className="flex items-center gap-2 pt-2.5 border-t border-sky-400/15 text-[11px] font-mono text-sky-300/90 flex-wrap">
                 <span>지원 형식:</span>
-                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
+                <span className="px-2.5 py-0.5 rounded-full bg-[#111622] border border-white/[0.08] text-slate-200">
                   📄 PDF 카탈로그 (.pdf)
                 </span>
-                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
+                <span className="px-2.5 py-0.5 rounded-full bg-[#111622] border border-white/[0.08] text-slate-200">
                   📊 CSV / Excel 표 (.csv, .tsv)
                 </span>
-                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
+                <span className="px-2.5 py-0.5 rounded-full bg-[#111622] border border-white/[0.08] text-slate-200">
                   📝 텍스트 / 마크다운 (.txt, .md, .json)
                 </span>
-                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
+                <span className="px-2.5 py-0.5 rounded-full bg-[#111622] border border-white/[0.08] text-slate-200">
                   📋 스펙 텍스트 직접 복사·붙여넣기
                 </span>
               </div>
@@ -664,10 +669,10 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                   const file = e.dataTransfer.files?.[0];
                   if (file) handleCatalogFileSelected(file);
                 }}
-                className={`rounded-xl border-2 border-dashed p-6 flex flex-col items-center justify-center text-center transition cursor-pointer relative min-h-[180px] ${
+                className={`rounded-2xl border-2 border-dashed p-6 flex flex-col items-center justify-center text-center transition cursor-pointer relative min-h-[190px] ${
                   isDraggingOver
-                    ? 'border-cyan-400 bg-cyan-950/40 scale-[1.01]'
-                    : 'border-slate-700 hover:border-cyan-500/60 bg-slate-950/60'
+                    ? 'border-sky-400 bg-sky-400/10 scale-[1.01]'
+                    : 'border-white/[0.14] hover:border-sky-400/50 bg-[#111622]'
                 }`}
               >
                 <input
@@ -679,30 +684,32 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                   }}
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                 />
-                <FileUp className="w-9 h-9 text-cyan-400 mb-2 opacity-90" />
-                <span className="text-sm font-bold text-slate-200 mb-1">
+                <div className="w-12 h-12 rounded-2xl bg-sky-400/12 border border-sky-400/25 flex items-center justify-center mb-3">
+                  <FileUp className="w-6 h-6 text-sky-400" />
+                </div>
+                <span className="text-sm font-semibold text-slate-100 mb-1">
                   카탈로그 파일을 여기에 끌어다 놓으세요
                 </span>
                 <span className="text-xs text-slate-400 mb-3">
                   또는 클릭하여 내 컴퓨터에서 파일 선택
                 </span>
-                <span className="px-3 py-1 rounded-full bg-slate-800 text-cyan-300 text-[11px] font-mono border border-slate-700">
+                <span className="px-3.5 py-1 rounded-full bg-[#1E2638] text-sky-300 text-[11px] font-mono border border-white/[0.08]">
                   {uploadedFileName ? `선택됨: ${uploadedFileName}` : 'PDF / CSV / TXT 파일 선택'}
                 </span>
               </div>
 
               {/* Right: Direct Text Paste Input */}
-              <div className="rounded-xl border border-slate-700 bg-slate-950/60 p-4 flex flex-col justify-between">
-                <div className="space-y-1.5 flex-1 flex flex-col">
+              <div className="rounded-2xl border border-white/[0.08] bg-[#111622] p-4 flex flex-col justify-between">
+                <div className="space-y-2 flex-1 flex flex-col">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
                       <FileText className="w-3.5 h-3.5 text-emerald-400" />
                       카탈로그 텍스트 직접 붙여넣기
                     </span>
                     <button
                       type="button"
                       onClick={() => setPastedText('')}
-                      className="text-[10px] text-slate-500 hover:text-slate-300"
+                      className="text-[11px] text-slate-400 hover:text-slate-200 px-2 py-0.5 rounded-full hover:bg-white/[0.06] transition"
                     >
                       지우기
                     </button>
@@ -712,14 +719,14 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                     value={pastedText}
                     onChange={(e) => setPastedText(e.target.value)}
                     placeholder="웹사이트나 문서에서 복사한 제품 스펙 표나 모델명 목록을 여기에 붙여넣으세요 (예: CDD12 12인치 400W 8옴 97dB 110x60 / XTi 4002 2ch 800W...)"
-                    className="w-full flex-1 rounded bg-slate-900 border border-slate-800 p-2 text-xs font-mono text-slate-200 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none resize-none"
+                    className="w-full flex-1 rounded-xl bg-[#0B0F17] border border-white/[0.08] p-3 text-xs font-mono text-slate-200 placeholder:text-slate-500 focus:border-emerald-400/70 focus:outline-none resize-none transition"
                   />
                 </div>
                 <button
                   type="button"
                   disabled={!pastedText.trim() || isParsing}
                   onClick={handleParsePastedText}
-                  className="mt-2.5 w-full py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 transition shadow"
+                  className="mt-3 w-full py-2 rounded-full bg-emerald-400 hover:bg-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-sm"
                 >
                   <Sparkles className="w-3.5 h-3.5" /> 텍스트 내용 자동 분석 및 추출
                 </button>
@@ -728,9 +735,9 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
 
             {/* Parsing Spinner */}
             {isParsing && (
-              <div className="p-8 rounded-xl bg-slate-950/80 border border-cyan-500/40 flex flex-col items-center justify-center gap-2">
-                <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-                <span className="text-xs font-bold text-cyan-300">
+              <div className="p-8 rounded-2xl bg-[#111622] border border-sky-400/30 flex flex-col items-center justify-center gap-2.5">
+                <Loader2 className="w-8 h-8 text-sky-400 animate-spin" />
+                <span className="text-xs font-semibold text-sky-300">
                   카탈로그 내용 및 음향 물리 사양을 파악 중입니다...
                 </span>
                 <span className="text-[11px] font-mono text-slate-400">
@@ -741,12 +748,12 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
 
             {/* Error Banner */}
             {parseError && (
-              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 flex items-center justify-between">
                 <span>⚠️ {parseError}</span>
                 <button
                   type="button"
                   onClick={() => setParseError(null)}
-                  className="text-slate-400 hover:text-white"
+                  className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-white/10"
                 >
                   ✕
                 </button>
@@ -755,16 +762,16 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
 
             {/* PARSED RESULTS TABLE & PREVIEW */}
             {parsedResult && parsedResult.products.length > 0 && (
-              <div className="rounded-xl border border-slate-700 bg-slate-950 p-4 space-y-4 shadow-xl">
+              <div className="rounded-2xl border border-white/[0.08] bg-[#111622] p-5 space-y-4 shadow-xl">
                 {/* Result Header Bar */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
-                  <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-white/[0.08]">
+                  <div className="flex items-center gap-2.5 flex-wrap">
                     <span className="text-xs text-slate-400">파악된 브랜드:</span>
                     <input
                       type="text"
                       value={forcedBrand || parsedResult.brandDetected}
                       onChange={(e) => setForcedBrand(e.target.value)}
-                      className="px-2 py-0.5 rounded bg-slate-900 border border-cyan-500/50 text-cyan-300 text-xs font-bold w-36 focus:outline-none"
+                      className="px-3 py-1 rounded-full bg-[#0B0F17] border border-sky-400/40 text-sky-300 text-xs font-semibold w-36 focus:outline-none"
                       title="클릭하여 브랜드명 변경"
                     />
                     <span className="text-xs text-slate-300 font-mono">
@@ -775,7 +782,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                   <button
                     type="button"
                     onClick={handleCommitParsedProducts}
-                    className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition transform active:scale-95"
+                    className="px-4 py-2 rounded-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-xs font-semibold flex items-center gap-1.5 shadow-sm transition active:scale-95"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     추출된 제품 {parsedResult.products.length}종 카탈로그에 일괄 등록하기
@@ -787,23 +794,23 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                   {parsedResult.products.map((prod, idx) => (
                     <div
                       key={prod.id}
-                      className="rounded-lg border border-slate-800 bg-slate-900/90 p-3 flex flex-col justify-between hover:border-cyan-500/50 transition relative group"
+                      className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3.5 flex flex-col justify-between hover:border-sky-400/40 transition relative group"
                     >
                       <button
                         type="button"
                         onClick={() => handleRemoveParsedCandidate(idx)}
                         data-tooltip="이 제품 제외"
-                        className="absolute top-2 right-2 text-slate-500 hover:text-rose-400 p-1 rounded"
+                        className="absolute top-2.5 right-2.5 text-slate-500 hover:text-rose-400 p-1 rounded-full hover:bg-white/[0.06] transition"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
 
-                      <div className="space-y-1.5 mb-2">
+                      <div className="space-y-2 mb-2.5">
                         <div className="flex items-center gap-1.5">
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-slate-800 text-cyan-300">
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold uppercase bg-[#1E2638] text-sky-300 border border-white/[0.06]">
                             {prod.category}
                           </span>
-                          <span className="text-xs font-bold text-slate-100 font-mono truncate max-w-[170px]">
+                          <span className="text-xs font-semibold text-slate-100 font-mono truncate max-w-[170px]">
                             {prod.model}
                           </span>
                         </div>
@@ -812,36 +819,36 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                         </p>
 
                         {/* Hardware Svg Preview */}
-                        <div className="bg-slate-950 p-1.5 rounded border border-slate-800 flex items-center justify-center">
+                        <div className="bg-[#0B0F17] p-2 rounded-xl border border-white/[0.06] flex items-center justify-center">
                           <DeviceSvgArtwork product={prod} width={180} height={38} />
                         </div>
                       </div>
 
                       {/* Key Physics Specs Pills */}
-                      <div className="pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-400 flex flex-wrap gap-1.5">
+                      <div className="pt-2.5 border-t border-white/[0.06] text-[10px] font-mono text-slate-400 flex flex-wrap gap-1.5">
                         {prod.speaker && (
                           <>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-950 text-amber-300">
+                            <span className="px-2 py-0.5 rounded-full bg-[#0B0F17] text-amber-300 border border-white/[0.06]">
                               {prod.speaker.driverSizeInch}" {prod.speaker.rmsWatts}W
                             </span>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-950 text-cyan-300">
+                            <span className="px-2 py-0.5 rounded-full bg-[#0B0F17] text-sky-300 border border-white/[0.06]">
                               {prod.speaker.sensitivityDb}dB
                             </span>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-950 text-emerald-300">
+                            <span className="px-2 py-0.5 rounded-full bg-[#0B0F17] text-emerald-300 border border-white/[0.06]">
                               {prod.speaker.dispersionHorizontalDeg}°x{prod.speaker.dispersionVerticalDeg}°
                             </span>
                           </>
                         )}
                         {prod.amplifier && (
                           <>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-950 text-amber-300">
+                            <span className="px-2 py-0.5 rounded-full bg-[#0B0F17] text-amber-300 border border-white/[0.06]">
                               {prod.amplifier.channels}CH
                             </span>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-950 text-cyan-300">
+                            <span className="px-2 py-0.5 rounded-full bg-[#0B0F17] text-sky-300 border border-white/[0.06]">
                               {prod.amplifier.watts8OhmPerCh}W @8Ω
                             </span>
                             {prod.amplifier.supports100v && (
-                              <span className="px-1.5 py-0.5 rounded bg-slate-950 text-emerald-300">
+                              <span className="px-2 py-0.5 rounded-full bg-[#0B0F17] text-emerald-300 border border-white/[0.06]">
                                 100V
                               </span>
                             )}
@@ -849,15 +856,15 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                         )}
                         {prod.mixer && (
                           <>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-950 text-cyan-300">
+                            <span className="px-2 py-0.5 rounded-full bg-[#0B0F17] text-sky-300 border border-white/[0.06]">
                               {prod.mixer.micLineInputs} MIC IN
                             </span>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-950 text-amber-300">
+                            <span className="px-2 py-0.5 rounded-full bg-[#0B0F17] text-amber-300 border border-white/[0.06]">
                               {prod.mixer.isDigital ? '디지털' : '아날로그'}
                             </span>
                           </>
                         )}
-                        <span className="px-1.5 py-0.5 rounded bg-slate-950 text-slate-400">
+                        <span className="px-2 py-0.5 rounded-full bg-[#0B0F17] text-slate-400 border border-white/[0.06]">
                           포트 {prod.ports.length}개
                         </span>
                       </div>
@@ -873,27 +880,27 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
             MODE 2: MANUAL FORM & 4 REGISTERED KOREAN DISTRIBUTOR AUTO-SPECS
            ========================================================================= */}
         {modalMode === 'manual' && (
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden bg-[#0B0F17]/40">
         {/* TOP BAR: 4 REGISTERED KOREAN DISTRIBUTOR SITES & AUTO-SPEC FETCHER */}
-        <div className="px-5 py-3 border-b border-slate-800 bg-slate-950/70 space-y-2.5">
+        <div className="px-6 py-3.5 border-b border-white/[0.08] bg-[#111622] space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs font-bold text-emerald-400 flex items-center gap-1 mr-1">
+              <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 mr-1">
                 <Globe className="w-3.5 h-3.5" /> 기본 등록 총판 사이트:
               </span>
               <button
                 type="button"
                 onClick={() => setSelectedDistId('all')}
-                className={`px-2 py-1 rounded text-[11px] font-mono transition ${
+                className={`px-3 py-1 rounded-full text-[11px] font-mono transition ${
                   selectedDistId === 'all'
-                    ? 'bg-emerald-500 text-slate-950 font-bold'
-                    : 'bg-slate-900 border border-slate-800 text-slate-300 hover:border-emerald-500/50'
+                    ? 'bg-emerald-400 text-slate-950 font-semibold shadow-sm'
+                    : 'bg-[#1E2638] border border-white/[0.08] text-slate-300 hover:border-emerald-400/40'
                 }`}
               >
                 전체(4곳)
               </button>
               {DEFAULT_KOREAN_DISTRIBUTORS.map((dist) => (
-                <div key={dist.id} className="inline-flex items-center gap-0.5">
+                <div key={dist.id} className="inline-flex items-center rounded-full overflow-hidden border border-white/[0.08]">
                   <button
                     type="button"
                     onClick={() =>
@@ -901,10 +908,10 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                     }
                     data-tooltip={`${dist.summary} (${dist.siteUrl})`}
                     data-tooltip-pos="bottom"
-                    className={`px-2.5 py-1 rounded-l text-[11px] font-bold transition ${
+                    className={`px-3 py-1 text-[11px] font-semibold transition ${
                       selectedDistId === dist.id
-                        ? 'bg-emerald-500 text-slate-950'
-                        : 'bg-slate-900 border border-slate-800 text-slate-200 hover:border-emerald-500/50'
+                        ? 'bg-emerald-400 text-slate-950'
+                        : 'bg-[#1E2638] text-slate-200 hover:bg-white/[0.08]'
                     }`}
                   >
                     {dist.shortLabel}
@@ -918,7 +925,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                     rel="noreferrer"
                     data-tooltip={`${dist.name} 공식 사이트 열기`}
                     data-tooltip-pos="bottom"
-                    className="px-1.5 py-1 rounded-r bg-slate-900 border border-l-0 border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-cyan-300"
+                    className="px-2 py-1 bg-[#111622] border-l border-white/[0.08] hover:bg-[#1E2638] text-slate-400 hover:text-sky-300 transition"
                   >
                     <ExternalLink className="w-3 h-3" />
                   </a>
@@ -938,7 +945,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
               }}
               data-tooltip="현재 선택된 총판의 미등록 표준 장비 사양을 한 번에 모두 카탈로그에 추가합니다"
               data-tooltip-pos="bottom"
-              className="px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[11px] font-bold flex items-center gap-1 whitespace-nowrap transition"
+              className="px-3 py-1.5 rounded-full bg-emerald-400/15 hover:bg-emerald-400/25 border border-emerald-400/35 text-emerald-200 text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap transition"
             >
               <Plus className="w-3 h-3" /> 미등록 총판장비 일괄등록 ({distSearchResults.length}종)
             </button>
@@ -947,7 +954,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
           {/* Model Search -> Auto Spec Fetch Input */}
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative flex-1 min-w-[240px]">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={distQuery}
@@ -959,7 +966,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                   }
                 }}
                 placeholder="찾으시는 모델명 입력 (예: QSC K12.2, Midas M32, JBL PRX912, Lab Gruppen PD3000, HK POLAR 12...)"
-                className="w-full rounded-lg bg-slate-900 border border-slate-700 pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none"
+                className="w-full rounded-full bg-[#0B0F17] border border-white/[0.12] pl-9 pr-4 py-2 text-xs text-white placeholder:text-slate-500 focus:border-emerald-400/70 focus:outline-none transition"
               />
             </div>
             <button
@@ -967,7 +974,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
               onClick={handleAutoFetchByModelInput}
               data-tooltip="입력한 모델명의 사양(출력·임피던스·감도·지향각·포트)을 총판 브랜드 DB에서 자동으로 가져와 아래 입력폼에 채웁니다"
               data-tooltip-pos="bottom"
-              className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1 shadow whitespace-nowrap transition"
+              className="px-4 py-2 rounded-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-xs font-semibold flex items-center gap-1.5 shadow-sm whitespace-nowrap transition"
             >
               <Sparkles className="w-3.5 h-3.5" /> 모델 사양 자동수집
             </button>
@@ -980,7 +987,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
               {distSearchResults.slice(0, 8).map((rec) => (
                 <div
                   key={rec.product.id}
-                  className="inline-flex items-center rounded bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-[11px] shrink-0 overflow-hidden"
+                  className="inline-flex items-center rounded-full bg-[#161C2B] border border-white/[0.08] hover:border-emerald-400/40 text-[11px] shrink-0 overflow-hidden transition"
                 >
                   <button
                     type="button"
@@ -988,12 +995,12 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                       populateFormFromDistributorProduct(rec.product, rec.distributorName)
                     }
                     data-tooltip={`[${rec.distributorName}] ${rec.product.name} — 클릭 시 아래 폼에 사양 자동채우기`}
-                    className="px-2 py-0.5 text-left hover:bg-slate-800 flex items-center gap-1"
+                    className="px-2.5 py-1 text-left hover:bg-[#1E2638] flex items-center gap-1"
                   >
                     <span className="text-[9px] font-mono text-emerald-400">
                       [{rec.distributorName}]
                     </span>
-                    <span className="font-mono font-bold text-slate-100">
+                    <span className="font-mono font-semibold text-slate-100">
                       {rec.product.brand} {rec.product.model}
                     </span>
                   </button>
@@ -1006,7 +1013,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                       );
                     }}
                     data-tooltip="카탈로그에 바로 추가"
-                    className="px-1.5 py-0.5 bg-emerald-500/20 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 font-bold transition"
+                    className="px-2 py-1 bg-emerald-400/15 hover:bg-emerald-400 hover:text-slate-950 text-emerald-300 font-semibold transition"
                   >
                     +등록
                   </button>
@@ -1016,12 +1023,12 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
           )}
 
           {autoFillBanner && (
-            <div className="text-[11px] font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-2.5 py-1 flex items-center justify-between">
+            <div className="text-[11px] font-mono text-emerald-300 bg-emerald-400/10 border border-emerald-400/25 rounded-full px-3.5 py-1 flex items-center justify-between">
               <span>✓ {autoFillBanner}</span>
               <button
                 type="button"
                 onClick={() => setAutoFillBanner(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white ml-2"
               >
                 ✕
               </button>
@@ -1032,25 +1039,25 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
         <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* LEFT 7 COLS: ADD CUSTOM PRODUCT FORM */}
           <form onSubmit={handleSaveCustomProduct} className="lg:col-span-7 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-400 whitespace-nowrap">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-sky-400 whitespace-nowrap">
                 1. 신규장비 사양입력 및 실물형블록 생성
               </h3>
 
               {/* Live SVG Preview of the Custom Product */}
-              <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+              <div className="flex items-center gap-2.5 bg-[#111622] px-3 py-1.5 rounded-2xl border border-white/[0.08]">
                 <span className="text-[10px] font-mono text-slate-400 whitespace-nowrap">아이콘 미리보기:</span>
                 <DeviceSvgArtwork product={previewProd} width={180} height={42} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-              <label className="space-y-1">
-                <span className="text-slate-400 whitespace-nowrap">제품 카테고리</span>
+              <label className="space-y-1.5">
+                <span className="text-[11px] text-slate-400 whitespace-nowrap block">제품 카테고리</span>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                  className="w-full rounded bg-slate-950 border border-slate-700 px-2.5 py-1.5 text-cyan-300 font-semibold"
+                  className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-3 py-2 text-sky-300 font-semibold focus:border-sky-400/70 focus:outline-none transition"
                 >
                   <option value="speaker">스피커(Speaker)</option>
                   <option value="amplifier">파워앰프(Power Amp)</option>
@@ -1061,65 +1068,65 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                 </select>
               </label>
 
-              <label className="space-y-1">
-                <span className="text-slate-400 whitespace-nowrap">제조사(Brand)</span>
+              <label className="space-y-1.5">
+                <span className="text-[11px] text-slate-400 whitespace-nowrap block">제조사(Brand)</span>
                 <input
                   type="text"
                   required
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
-                  className="w-full rounded bg-slate-950 border border-slate-700 px-2.5 py-1.5 text-slate-100"
+                  className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-3 py-2 text-slate-100 focus:border-sky-400/70 focus:outline-none transition"
                 />
               </label>
 
-              <label className="space-y-1">
-                <span className="text-slate-400 whitespace-nowrap">모델명(Model)</span>
+              <label className="space-y-1.5">
+                <span className="text-[11px] text-slate-400 whitespace-nowrap block">모델명(Model)</span>
                 <input
                   type="text"
                   required
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  className="w-full rounded bg-slate-950 border border-slate-700 px-2.5 py-1.5 font-mono text-slate-100"
+                  className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-3 py-2 font-mono text-slate-100 focus:border-sky-400/70 focus:outline-none transition"
                 />
               </label>
 
-              <label className="space-y-1 md:col-span-2">
-                <span className="text-slate-400 whitespace-nowrap">품명 및 요약규격</span>
+              <label className="space-y-1.5 md:col-span-2">
+                <span className="text-[11px] text-slate-400 whitespace-nowrap block">품명 및 요약규격</span>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded bg-slate-950 border border-slate-700 px-2.5 py-1.5 text-slate-100"
+                  className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-3 py-2 text-slate-100 focus:border-sky-400/70 focus:outline-none transition"
                 />
               </label>
 
-              <label className="space-y-1">
-                <span className="text-slate-400 whitespace-nowrap">단가(KRW ₩)</span>
+              <label className="space-y-1.5">
+                <span className="text-[11px] text-slate-400 whitespace-nowrap block">단가(KRW ₩)</span>
                 <input
                   type="number"
                   min={0}
                   step={10000}
                   value={unitPriceKrw}
                   onChange={(e) => setUnitPriceKrw(Number(e.target.value))}
-                  className="w-full rounded bg-slate-950 border border-slate-700 px-2.5 py-1.5 font-mono text-emerald-300"
+                  className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-3 py-2 font-mono text-emerald-300 focus:border-sky-400/70 focus:outline-none transition"
                 />
               </label>
             </div>
 
             {/* Category-Specific Technical Specifications */}
             {category === 'speaker' && (
-              <div className="rounded-lg border border-orange-500/30 bg-slate-950/90 p-3.5 space-y-3 text-xs">
-                <div className="font-bold text-orange-300 break-keep">
+              <div className="rounded-2xl border border-amber-400/25 bg-[#111622] p-4 space-y-3 text-xs">
+                <div className="font-semibold text-amber-300 break-keep">
                   스피커 음향·전기 물리사양 (SPL 분포도 및 앰프매칭에 직접 반영)
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <label className="space-y-1 md:col-span-2">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">스피커 구동방식/외형</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">스피커 구동방식/외형</span>
                     <select
                       value={spkType}
                       onChange={(e) => setSpkType(e.target.value as typeof spkType)}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 text-slate-200"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 text-slate-200 focus:border-sky-400/70 focus:outline-none transition"
                     >
                       <option value="passive_lowz">패시브 포인트소스(Low-Z 4/8Ω)</option>
                       <option value="column">패시브 라인컬럼어레이(Low-Z)</option>
@@ -1130,36 +1137,36 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                   </label>
 
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">정격 허용입력 RMS(W)</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">정격 허용입력 RMS(W)</span>
                     <input
                       type="number"
                       min={5}
                       max={4000}
                       value={rmsWatts}
                       onChange={(e) => setRmsWatts(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-orange-300"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-amber-300 focus:border-sky-400/70 focus:outline-none transition"
                     />
                   </label>
 
                   {spkType === 'highz_100v' ? (
                     <label className="space-y-1">
-                      <span className="text-[11px] text-slate-400 whitespace-nowrap">100V 탭출력(W)</span>
+                      <span className="text-[11px] text-slate-400 whitespace-nowrap block">100V 탭출력(W)</span>
                       <input
                         type="number"
                         min={2}
                         max={120}
                         value={tap100vWatts}
                         onChange={(e) => setTap100vWatts(Number(e.target.value))}
-                        className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-amber-300"
+                        className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-amber-300 focus:border-sky-400/70 focus:outline-none transition"
                       />
                     </label>
                   ) : (
                     <label className="space-y-1">
-                      <span className="text-[11px] text-slate-400 whitespace-nowrap">공칭 임피던스(Ω)</span>
+                      <span className="text-[11px] text-slate-400 whitespace-nowrap block">공칭 임피던스(Ω)</span>
                       <select
                         value={impedanceOhms}
                         onChange={(e) => setImpedanceOhms(Number(e.target.value))}
-                        className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-cyan-300"
+                        className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-sky-300 focus:border-sky-400/70 focus:outline-none transition"
                       >
                         <option value={4}>4Ω</option>
                         <option value={8}>8Ω</option>
@@ -1169,7 +1176,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                   )}
 
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">감도/효율(dB @1W/1m)</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">감도/효율(dB @1W/1m)</span>
                     <input
                       type="number"
                       step={0.5}
@@ -1177,36 +1184,36 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                       max={112}
                       value={sensitivityDb}
                       onChange={(e) => setSensitivityDb(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-emerald-300"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-emerald-300 focus:border-sky-400/70 focus:outline-none transition"
                     />
                   </label>
 
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">수평 지향각(°H)</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">수평 지향각(°H)</span>
                     <input
                       type="number"
                       min={20}
                       max={360}
                       value={dispersionH}
                       onChange={(e) => setDispersionH(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-cyan-300"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-sky-300 focus:border-sky-400/70 focus:outline-none transition"
                     />
                   </label>
 
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">수직 지향각(°V)</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">수직 지향각(°V)</span>
                     <input
                       type="number"
                       min={10}
                       max={180}
                       value={dispersionV}
                       onChange={(e) => setDispersionV(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-cyan-300"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-sky-300 focus:border-sky-400/70 focus:outline-none transition"
                     />
                   </label>
 
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">유닛 구경(Inch)</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">유닛 구경(Inch)</span>
                     <input
                       type="number"
                       step={0.5}
@@ -1214,7 +1221,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                       max={21}
                       value={driverInch}
                       onChange={(e) => setDriverInch(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-slate-200"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-slate-200 focus:border-sky-400/70 focus:outline-none transition"
                     />
                   </label>
                 </div>
@@ -1222,15 +1229,15 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
             )}
 
             {category === 'amplifier' && (
-              <div className="rounded-lg border border-cyan-500/30 bg-slate-950/90 p-3.5 space-y-3 text-xs">
-                <div className="font-bold text-cyan-300 break-keep">파워앰프 채널 및 임피던스별 정격출력 사양</div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+              <div className="rounded-2xl border border-sky-400/25 bg-[#111622] p-4 space-y-3 text-xs">
+                <div className="font-semibold text-sky-300 break-keep">파워앰프 채널 및 임피던스별 정격출력 사양</div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">채널수(CH)</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">채널수(CH)</span>
                     <select
                       value={ampChannels}
                       onChange={(e) => setAmpChannels(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-cyan-300"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-sky-300 focus:border-sky-400/70 focus:outline-none transition"
                     >
                       <option value={1}>1채널</option>
                       <option value={2}>2채널</option>
@@ -1239,31 +1246,32 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                     </select>
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">8Ω 채널당 출력(W)</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">8Ω 채널당 출력(W)</span>
                     <input
                       type="number"
                       value={watts8Ohm}
                       onChange={(e) => setWatts8Ohm(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-orange-300"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-amber-300 focus:border-sky-400/70 focus:outline-none transition"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">4Ω 채널당 출력(W)</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">4Ω 채널당 출력(W)</span>
                     <input
                       type="number"
                       value={watts4Ohm}
                       onChange={(e) => setWatts4Ohm(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-orange-300"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-amber-300 focus:border-sky-400/70 focus:outline-none transition"
                     />
                   </label>
                   <label className="space-y-1 flex flex-col justify-end">
-                    <span className="flex items-center gap-1.5 cursor-pointer py-1 whitespace-nowrap">
+                    <span className="flex items-center gap-2 cursor-pointer py-1.5 px-2.5 rounded-xl bg-[#0B0F17] border border-white/[0.08] whitespace-nowrap">
                       <input
                         type="checkbox"
                         checked={supports100v}
                         onChange={(e) => setSupports100v(e.target.checked)}
+                        className="accent-sky-400"
                       />
-                      100V 하이임피던스 전용
+                      100V 하이임피던스
                     </span>
                   </label>
                 </div>
@@ -1274,38 +1282,39 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
               category === 'dsp' ||
               category === 'source_mic' ||
               category === 'network') && (
-              <div className="rounded-lg border border-purple-500/30 bg-slate-950/90 p-3.5 space-y-3 text-xs">
-                <div className="font-bold text-purple-300 break-keep">
+              <div className="rounded-2xl border border-indigo-400/25 bg-[#111622] p-4 space-y-3 text-xs">
+                <div className="font-semibold text-indigo-300 break-keep">
                   포인트투포인트 결선용 입력(IN)/출력(OUT) 포트개수 지정
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-end">
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">입력포트(IN) 수</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">입력포트(IN) 수</span>
                     <input
                       type="number"
                       min={0}
                       max={32}
                       value={inPortCount}
                       onChange={(e) => setInPortCount(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-cyan-300"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-sky-300 focus:border-sky-400/70 focus:outline-none transition"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-[11px] text-slate-400 whitespace-nowrap">출력포트(OUT) 수</span>
+                    <span className="text-[11px] text-slate-400 whitespace-nowrap block">출력포트(OUT) 수</span>
                     <input
                       type="number"
                       min={1}
                       max={24}
                       value={outPortCount}
                       onChange={(e) => setOutPortCount(Number(e.target.value))}
-                      className="w-full rounded bg-slate-900 border border-slate-700 px-2 py-1 font-mono text-orange-300"
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.12] px-2.5 py-1.5 font-mono text-amber-300 focus:border-sky-400/70 focus:outline-none transition"
                     />
                   </label>
-                  <label className="flex items-center gap-1.5 pt-4 cursor-pointer whitespace-nowrap">
+                  <label className="flex items-center gap-2 py-1.5 px-3 rounded-xl bg-[#0B0F17] border border-white/[0.08] cursor-pointer whitespace-nowrap md:col-span-2">
                     <input
                       type="checkbox"
                       checked={hasDantePort}
                       onChange={(e) => setHasDantePort(e.target.checked)}
+                      className="accent-indigo-400"
                     />
                     Dante RJ45 포트 포함
                   </label>
@@ -1314,16 +1323,16 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
             )}
 
             {/* Optional Custom Front Panel Image */}
-            <div className="flex items-center justify-between gap-3 pt-1 text-xs">
-              <label className="flex items-center gap-2 text-slate-300 cursor-pointer bg-slate-800/80 hover:bg-slate-800 px-3 py-1.5 rounded border border-slate-700 whitespace-nowrap">
-                <Upload className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="flex items-center justify-between gap-3 pt-2 text-xs border-t border-white/[0.08]">
+              <label className="flex items-center gap-2 text-slate-200 cursor-pointer bg-[#1E2638] hover:bg-white/[0.12] px-3.5 py-2 rounded-full border border-white/[0.08] whitespace-nowrap transition">
+                <Upload className="w-3.5 h-3.5 text-sky-400" />
                 실물외형 이미지 업로드(선택)
                 <input type="file" accept="image/*" onChange={handleImageFileUpload} className="hidden" />
               </label>
 
               <button
                 type="submit"
-                className="px-5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold flex items-center gap-1.5 shadow-lg shadow-cyan-500/20 whitespace-nowrap"
+                className="px-5 py-2 rounded-full bg-sky-400 hover:bg-sky-300 text-slate-950 font-semibold flex items-center gap-1.5 shadow-sm whitespace-nowrap transition"
               >
                 <Plus className="w-4 h-4" /> 카탈로그에 장비추가
               </button>
@@ -1331,16 +1340,16 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
           </form>
 
           {/* RIGHT 5 COLS: CSV BULK IMPORT & EXISTING CATALOG LIST */}
-          <div className="lg:col-span-5 flex flex-col space-y-4 border-l border-slate-800 pl-6">
-            <div className="rounded-lg border border-slate-800 bg-slate-950 p-3.5 space-y-2.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 whitespace-nowrap">
+          <div className="lg:col-span-5 flex flex-col space-y-4 lg:border-l border-white/[0.08] lg:pl-6">
+            <div className="rounded-2xl border border-white/[0.08] bg-[#111622] p-4 space-y-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-emerald-400 whitespace-nowrap">
                 2. 엑셀(CSV)/JSON 제품목록 일괄등록
               </h4>
-              <p className="text-[11px] text-slate-400 break-keep">
+              <p className="text-[11px] text-slate-400 break-keep leading-relaxed">
                 보유 중인 장비리스트(CSV/JSON)를 업로드하면 그 사양 안에서 공간에 맞는 최적조합을 추천해 드립니다.
               </p>
               <div className="flex items-center gap-2">
-                <label className="flex-1 text-center py-1.5 px-3 rounded bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <label className="flex-1 text-center py-2 px-3 rounded-full bg-emerald-400/15 hover:bg-emerald-400/25 border border-emerald-400/35 text-emerald-200 text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap transition">
                   <FileUp className="w-3.5 h-3.5" /> CSV/JSON 파일업로드
                   <input
                     type="file"
@@ -1352,16 +1361,16 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                 <button
                   type="button"
                   onClick={handleDownloadSampleCsv}
-                  className="py-1.5 px-2.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center gap-1 whitespace-nowrap"
+                  className="py-2 px-3.5 rounded-full bg-[#1E2638] hover:bg-white/[0.12] border border-white/[0.08] text-slate-200 text-xs flex items-center gap-1.5 whitespace-nowrap transition"
                 >
                   <Download className="w-3.5 h-3.5" /> 양식 다운로드
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-slate-300 whitespace-nowrap">
+            <div className="flex-1 flex flex-col min-h-0 rounded-2xl border border-white/[0.08] bg-[#111622] p-4">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-semibold text-slate-200 whitespace-nowrap">
                   현재 등록된 장비목록 ({catalog.length}종)
                 </span>
               </div>
@@ -1369,24 +1378,25 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                 {catalog.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between rounded bg-slate-950/80 border border-slate-800 px-2.5 py-1.5 text-xs"
+                    className="flex items-center justify-between rounded-xl bg-[#0B0F17] border border-white/[0.06] px-3 py-2 text-xs hover:border-white/[0.14] transition"
                   >
                     <div className="truncate pr-2">
-                      <span className="font-mono text-cyan-400 font-semibold mr-1">
+                      <span className="font-mono text-sky-400 font-semibold mr-1.5">
                         [{item.brand}] {item.model}
                       </span>
                       <span className="text-slate-300">{item.name}</span>
                     </div>
                     {item.id.startsWith('custom-') || item.id.startsWith('csv-') ? (
                       <button
+                        type="button"
                         onClick={() => onDeleteProduct(item.id)}
-                        className="text-rose-400 hover:text-rose-300 p-1 shrink-0"
+                        className="text-rose-400 hover:text-rose-300 p-1 rounded-full hover:bg-rose-400/10 shrink-0 transition"
                         title="삭제"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     ) : (
-                      <span className="text-[10px] font-mono text-slate-500 shrink-0 whitespace-nowrap">기본내장</span>
+                      <span className="px-2 py-0.5 rounded-full bg-[#1E2638] text-[10px] font-mono text-slate-400 shrink-0 whitespace-nowrap">기본내장</span>
                     )}
                   </div>
                 ))}

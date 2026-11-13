@@ -24,13 +24,20 @@ import {
 } from '../services/distributorCatalog';
 import {
   AlertTriangle,
+  Cable,
   CheckCircle2,
   Cpu,
   FileUp,
   Globe,
+  Grid3X3,
+  Info,
+  Maximize2,
+  PanelRightClose,
+  PanelRightOpen,
   Plus,
   Radio,
   RotateCcw,
+  Search,
   Sliders,
   Speaker,
   Trash2,
@@ -119,9 +126,11 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState<number>(0.82);
-  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 10, y: 10 });
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 16, y: 64 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [snapToGrid, setSnapToGrid] = useState<boolean>(true);
+  const [showGrid, setShowGrid] = useState<boolean>(true);
 
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -135,6 +144,8 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
   } | null>(null);
   const [mouseWorldPos, setMouseWorldPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [selectedConnId, setSelectedConnId] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [inspectorOpen, setInspectorOpen] = useState<boolean>(true);
 
   // Cable endpoint re-routing (drag a cable end onto another port) + feedback toast
   const [rewire, setRewire] = useState<{ connId: string; end: 'from' | 'to' } | null>(null);
@@ -156,6 +167,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
         setWiringStart(null);
         setRewire(null);
         setSelectedConnId(null);
+        setSelectedNodeId(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -207,10 +219,11 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
     setMouseWorldPos(world);
 
     if (draggingNodeId) {
+      const step = snapToGrid ? 10 : 1;
       onUpdateNodePosition(
         draggingNodeId,
-        Math.max(10, Math.round((world.x - dragOffset.x) / 10) * 10),
-        Math.max(10, Math.round((world.y - dragOffset.y) / 10) * 10)
+        Math.max(10, Math.round((world.x - dragOffset.x) / step) * step),
+        Math.max(10, Math.round((world.y - dragOffset.y) / step) * step)
       );
       return;
     }
@@ -268,8 +281,9 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
     const productId = e.dataTransfer.getData('application/audiocad-product');
     const autoJson = e.dataTransfer.getData('application/audiocad-auto-product');
     const world = clientToWorld(e.clientX, e.clientY);
-    const dropX = Math.max(20, Math.round((world.x - NODE_WIDTH / 2) / 10) * 10);
-    const dropY = Math.max(20, Math.round((world.y - 40) / 10) * 10);
+    const step = snapToGrid ? 10 : 1;
+    const dropX = Math.max(20, Math.round((world.x - NODE_WIDTH / 2) / step) * step);
+    const dropY = Math.max(20, Math.round((world.y - 40) / step) * step);
 
     if (autoJson) {
       try {
@@ -283,6 +297,43 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
 
     if (!productId) return;
     onAddNode(productId, dropX, dropY);
+  };
+
+  const handleFitView = () => {
+    if (!canvasRef.current || nodes.length === 0) {
+      setZoom(0.85);
+      setPan({ x: 16, y: 64 });
+      return;
+    }
+    const rect = canvasRef.current.getBoundingClientRect();
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    nodes.forEach((n) => {
+      const prod = catalogMap.get(n.productId);
+      const portCount = prod
+        ? Math.max(
+            prod.ports.filter((p) => p.direction === 'in').length,
+            prod.ports.filter((p) => p.direction === 'out').length,
+            1
+          )
+        : 2;
+      const h = getNodeHeaderHeight(prod) + portCount * PORT_ROW_HEIGHT + 24;
+      minX = Math.min(minX, n.x);
+      minY = Math.min(minY, n.y);
+      maxX = Math.max(maxX, n.x + NODE_WIDTH);
+      maxY = Math.max(maxY, n.y + h);
+    });
+    const contentW = Math.max(300, maxX - minX + 80);
+    const contentH = Math.max(240, maxY - minY + 120);
+    const fitZoom = Math.min(1.15, Math.max(0.45, Math.min((rect.width - 48) / contentW, (rect.height - 96) / contentH)));
+    const roundedZoom = Math.round(fitZoom * 100) / 100;
+    setZoom(roundedZoom);
+    setPan({
+      x: Math.round((rect.width - (maxX - minX) * roundedZoom) / 2 - minX * roundedZoom),
+      y: Math.round((rect.height - (maxY - minY) * roundedZoom) / 2 - minY * roundedZoom + 20),
+    });
   };
 
   const activeDistributorObj =
@@ -323,18 +374,27 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
   }, [searchQuery, catalog, distributorFilter, categoryFilter]);
 
   const selectedConn = connections.find((c) => c.id === selectedConnId) || null;
+  const selectedNode = nodes.find((n) => n.id === selectedNodeId) || null;
+  const selectedNodeProduct = selectedNode ? catalogMap.get(selectedNode.productId) : undefined;
+
+  // Keep reference to buildOrthogonalCablePath if needed by external checks
+  void buildOrthogonalCablePath;
+  void onRegisterProduct;
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-slate-950">
-      {/* LEFT EQUIPMENT PALETTE (DRAG & DROP SIDEBAR) */}
-      <aside className="w-68 shrink-0 border-r border-slate-800 bg-slate-900/90 flex flex-col">
-        <div className="p-2.5 border-b border-slate-800 space-y-1.5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-cyan-400 flex items-center gap-1.5 whitespace-nowrap">
-              <Sliders className="w-3.5 h-3.5" /> 장비 라이브러리
+    <div className="flex h-full w-full overflow-hidden bg-[#0B0F17] text-slate-100">
+      {/* LEFT EQUIPMENT PALETTE (MATERIAL 3 STUDIO TONAL SIDEBAR) */}
+      <aside className="w-72 shrink-0 border-r border-white/[0.08] bg-[#111622] flex flex-col">
+        <div className="p-3.5 border-b border-white/[0.08] space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-xs font-semibold text-slate-100 flex items-center gap-2 whitespace-nowrap">
+              <span className="w-6 h-6 rounded-lg bg-sky-400/15 border border-sky-400/30 flex items-center justify-center text-sky-300">
+                <Sliders className="w-3.5 h-3.5" />
+              </span>
+              장비 라이브러리
             </h3>
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-mono text-slate-400 whitespace-nowrap">
+              <span className="px-2 py-0.5 rounded-full bg-white/[0.06] text-[11px] font-mono text-slate-300 whitespace-nowrap">
                 {filteredCatalog.length}종
               </span>
               {onOpenCatalogModal && (
@@ -343,23 +403,27 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                   onClick={onOpenCatalogModal}
                   data-tooltip="브랜드 카탈로그 파일(PDF, CSV, TXT) 업로드하여 제품목록 자동추가"
                   data-tooltip-pos="right"
-                  className="px-1.5 py-0.5 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[10px] font-bold flex items-center gap-1 transition"
+                  className="px-2.5 py-1 rounded-full bg-sky-400/15 hover:bg-sky-400/25 text-sky-300 border border-sky-400/30 text-[10px] font-semibold flex items-center gap-1 transition"
                 >
-                  <FileUp className="w-3 h-3" /> 카탈로그 업로드
+                  <FileUp className="w-3 h-3" /> 카탈로그
                 </button>
               )}
             </div>
           </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="모델·브랜드 검색 (미등록 시 자동수집)"
-            className="w-full rounded bg-slate-950 border border-slate-800 px-2.5 py-1 text-xs text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-          />
+
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="모델·브랜드 검색 (미등록 시 자동수집)"
+              className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.08] pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-sky-400/60 focus:outline-none transition"
+            />
+          </div>
 
           {/* 4대 기본 등록 공식 수입·총판 사이트 칩 (삼아사운드, 삼아CDS, 테크데이타PS, 온누리음향) */}
-          <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {DEFAULT_KOREAN_DISTRIBUTORS.map((dist) => {
               const isActive = distributorFilter === dist.id;
               return (
@@ -371,10 +435,10 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                   }
                   data-tooltip={`${dist.name} (${dist.siteUrl}) | 취급: ${dist.brands.join(', ')}`}
                   data-tooltip-pos="right"
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition whitespace-nowrap ${
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono transition whitespace-nowrap border ${
                     isActive
-                      ? 'bg-emerald-500 text-slate-950 font-bold'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-emerald-300 hover:border-emerald-500/40'
+                      ? 'bg-emerald-400/20 border-emerald-400/50 text-emerald-200 font-semibold'
+                      : 'bg-[#0B0F17]/70 border-white/[0.08] text-slate-400 hover:text-emerald-300 hover:border-emerald-400/40'
                   }`}
                 >
                   {dist.shortLabel}
@@ -383,7 +447,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
             })}
           </div>
 
-          <div className="grid grid-cols-3 gap-1 text-[11px]">
+          <div className="grid grid-cols-3 gap-1 text-[11px] bg-[#0B0F17]/70 p-1 rounded-xl border border-white/[0.06]">
             {[
               { id: 'all', label: '전체' },
               { id: 'source_mic', label: '소스·마이크' },
@@ -395,10 +459,10 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
               <button
                 key={cat.id}
                 onClick={() => setCategoryFilter(cat.id)}
-                className={`py-1 px-1.5 rounded font-medium whitespace-nowrap transition ${
+                className={`py-1 px-1.5 rounded-lg font-medium whitespace-nowrap transition ${
                   categoryFilter === cat.id
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50'
-                    : 'bg-slate-800/70 text-slate-400 hover:text-slate-200'
+                    ? 'bg-sky-400/20 text-sky-200 border border-sky-400/40 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] border border-transparent'
                 }`}
               >
                 {cat.label}
@@ -407,16 +471,16 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
           </div>
         </div>
 
-        {/* Equipment Draggable Cards (Minimal Dashboard Style + Auto-Fetched Distributor Specs) */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
-          {/* 4대 총판 사이트 실시간 자동수집 결과 (카탈로그 미등록 모델 검색 또는 총판 필터 선택 시 자동 표시) */}
+        {/* Equipment Draggable Cards (Material 3 Studio Tonal Cards + Auto-Fetched Distributor Specs) */}
+        <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
+          {/* 4대 총판 사이트 실시간 자동수집 결과 */}
           {autoFetchedDistributorRecords.length > 0 && (
-            <div className="rounded-lg border border-emerald-500/40 bg-emerald-950/20 p-1.5 space-y-1.5 mb-2">
+            <div className="rounded-2xl border border-emerald-400/30 bg-emerald-950/20 p-2 space-y-2 mb-2">
               <div className="flex items-center justify-between px-1">
                 <span
                   data-tooltip="기본 카탈로그에 없는 모델을 삼아사운드·삼아CDS·테크데이타PS·온누리음향 취급 브랜드 DB에서 자동 추출했습니다"
                   data-tooltip-pos="right"
-                  className="text-[10px] font-bold text-emerald-300 flex items-center gap-1 cursor-help"
+                  className="text-[10px] font-semibold text-emerald-300 flex items-center gap-1.5 cursor-help"
                 >
                   <Globe className="w-3 h-3" /> 총판 사이트 자동수집 ({autoFetchedDistributorRecords.length})
                 </span>
@@ -435,14 +499,14 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                       );
                     }}
                     title={`[${rec.distributorName}] ${prod.name} | ${prod.description} (클릭 또는 드래그 시 자동 등록 및 배치)`}
-                    className="rounded border border-emerald-500/40 bg-slate-950/95 p-2 hover:border-emerald-400 transition cursor-grab active:cursor-grabbing"
+                    className="rounded-xl border border-emerald-400/30 bg-[#161C2B] p-2 hover:border-emerald-400/60 transition cursor-grab active:cursor-grabbing"
                   >
-                    <div className="flex items-center justify-between gap-1 mb-1">
-                      <div className="min-w-0 flex items-center gap-1">
-                        <span className="px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[9px] shrink-0">
+                    <div className="flex items-center justify-between gap-1.5 mb-1.5">
+                      <div className="min-w-0 flex items-center gap-1.5">
+                        <span className="px-1.5 py-0.5 rounded-full bg-emerald-400/15 text-emerald-300 font-mono text-[9px] shrink-0">
                           {rec.distributorName}
                         </span>
-                        <span className="text-[11px] font-mono text-white font-bold truncate">
+                        <span className="text-[11px] font-mono text-white font-semibold truncate">
                           {prod.brand} {prod.model}
                         </span>
                       </div>
@@ -450,12 +514,12 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                         onClick={() => onAddNode(prod.id, undefined, undefined, prod)}
                         data-tooltip={`[${rec.distributorName}] 사양 자동등록 및 캔버스 배치`}
                         data-tooltip-pos="right"
-                        className="px-1.5 py-0.5 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[10px] font-bold flex items-center gap-0.5 shrink-0 transition"
+                        className="px-2 py-0.5 rounded-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-[10px] font-bold flex items-center gap-0.5 shrink-0 transition"
                       >
                         <Plus className="w-2.5 h-2.5" /> 자동등록
                       </button>
                     </div>
-                    <div className="flex justify-center bg-slate-900/70 rounded py-1">
+                    <div className="flex justify-center bg-[#0B0F17]/80 rounded-lg py-1.5 border border-white/[0.04]">
                       <DeviceSvgArtwork
                         product={prod}
                         width={196}
@@ -477,11 +541,11 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                 e.dataTransfer.setData('application/audiocad-product', prod.id);
               }}
               title={`${prod.name} | IN ${prod.ports.filter((p) => p.direction === 'in').length} · OUT ${prod.ports.filter((p) => p.direction === 'out').length} (드래그 또는 + 클릭)`}
-              className="group rounded-lg border border-slate-800 bg-slate-950/90 p-2 hover:border-cyan-500/60 transition cursor-grab active:cursor-grabbing"
+              className="group rounded-2xl border border-white/[0.08] bg-[#161C2B] p-2.5 hover:border-sky-400/50 hover:bg-[#1B2234] transition cursor-grab active:cursor-grabbing"
             >
-              <div className="flex items-center justify-between gap-1 mb-1">
+              <div className="flex items-center justify-between gap-1.5 mb-1.5">
                 <div className="min-w-0 flex items-center gap-1.5">
-                  <span className="text-[11px] font-mono text-cyan-300 font-bold truncate">
+                  <span className="text-[11px] font-mono text-sky-300 font-semibold truncate">
                     {prod.brand} {prod.model}
                   </span>
                 </div>
@@ -492,14 +556,14 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                   <button
                     onClick={() => onAddNode(prod.id)}
                     data-tooltip={`${prod.name} 캔버스에 추가`}
-                    className="rounded bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 p-1 text-slate-300 transition"
+                    className="rounded-full bg-white/[0.07] hover:bg-sky-400 hover:text-slate-950 p-1 text-slate-300 transition"
                   >
                     <Plus className="w-3 h-3" />
                   </button>
                 </div>
               </div>
 
-              <div className="flex justify-center bg-slate-900/70 rounded py-1">
+              <div className="flex justify-center bg-[#0B0F17]/80 rounded-xl py-1.5 border border-white/[0.04]">
                 <DeviceSvgArtwork
                   product={prod}
                   width={204}
@@ -513,20 +577,20 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
       </aside>
 
       {/* CENTER INTERACTIVE SIGNAL FLOW CANVAS */}
-      <div className="flex-1 flex flex-col relative overflow-hidden">
-        {/* Top Canvas Toolbar & Legend */}
-        <div className="h-10 border-b border-slate-800 bg-slate-900/90 px-3 flex items-center justify-between z-20 whitespace-nowrap">
-          <div className="flex items-center gap-3 text-xs">
+      <div className="flex-1 flex flex-col relative overflow-hidden bg-[#0B0F17]">
+        {/* FLOATING PILL TOOLBAR OVERLAY */}
+        <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between gap-2 pointer-events-none">
+          {/* Left Floating Pill: Guide + Multi-Color Cable Legend */}
+          <div className="pointer-events-auto flex items-center gap-2.5 rounded-full bg-[#111622]/90 backdrop-blur-md border border-white/[0.09] px-3.5 py-1.5 shadow-xl whitespace-nowrap">
             <span
               data-tooltip="장비 우측 OUT 단자를 클릭한 뒤 연결할 장비의 좌측 IN 단자를 클릭하세요"
               data-tooltip-pos="bottom"
-              className="font-semibold text-cyan-300 flex items-center gap-1 cursor-help bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded text-[11px]"
+              className="font-semibold text-sky-300 flex items-center gap-1 cursor-help bg-sky-400/15 border border-sky-400/30 px-2.5 py-0.5 rounded-full text-[11px]"
             >
-              <Zap className="w-3 h-3 text-cyan-400" /> OUT➔IN 직각결선
+              <Zap className="w-3 h-3 text-sky-400" /> OUT➔IN 직각결선
             </span>
 
-            {/* Multi-Color Cable Type Legend */}
-            <div className="hidden lg:flex items-center gap-2.5 border-l border-slate-800 pl-3 text-[11px]">
+            <div className="hidden xl:flex items-center gap-2.5 border-l border-white/[0.08] pl-2.5 text-[11px]">
               {CABLE_TYPE_LEGEND.map((item) => (
                 <span
                   key={item.id}
@@ -549,100 +613,103 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
             </div>
           </div>
 
-          {/* Zoom & Auto-Layout Controls */}
-          <div className="flex items-center gap-1.5">
+          {/* Right Floating Pill: Auto-Layout, Grid/Snap, Zoom, Fit, Reset, Inspector Toggle */}
+          <div className="pointer-events-auto flex items-center gap-1 rounded-full bg-[#111622]/90 backdrop-blur-md border border-white/[0.09] px-2 py-1 shadow-xl whitespace-nowrap">
             {wiringStart && (
               <button
                 onClick={() => setWiringStart(null)}
                 data-tooltip="현재 진행 중인 포트 결선 취소(ESC)"
                 data-tooltip-pos="bottom"
-                className="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/50 text-rose-300 text-xs font-medium mr-1"
+                className="px-2.5 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-medium mr-1"
               >
-                취소
+                결선 취소
               </button>
             )}
             <button
               onClick={onAutoLayoutNodes}
               data-tooltip="신호흐름 단계별로 장비 노드를 겹침 없이 자동 정렬"
               data-tooltip-pos="bottom"
-              className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs flex items-center gap-1 transition"
+              className="px-2.5 py-1 rounded-full hover:bg-white/[0.08] text-slate-200 text-xs font-medium flex items-center gap-1.5 transition"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-cyan-400" /> 자동정렬
+              <RotateCcw className="w-3.5 h-3.5 text-sky-400" /> 자동정렬
             </button>
+
+            <div className="h-4 w-px bg-white/[0.08] mx-0.5" />
+
+            <button
+              onClick={() => {
+                setSnapToGrid((s) => !s);
+                setShowGrid((g) => !g);
+              }}
+              data-tooltip={snapToGrid ? '10px 그리드 스냅 켜짐 (클릭 시 해제)' : '그리드 스냅 꺼짐 (클릭 시 켜기)'}
+              data-tooltip-pos="bottom"
+              className={`px-2 py-1 rounded-full text-xs flex items-center gap-1 transition ${
+                snapToGrid
+                  ? 'bg-sky-400/15 text-sky-300 border border-sky-400/30'
+                  : 'text-slate-400 hover:bg-white/[0.08] border border-transparent'
+              }`}
+            >
+              <Grid3X3 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline text-[11px]">스냅</span>
+            </button>
+
+            <div className="h-4 w-px bg-white/[0.08] mx-0.5" />
+
             <button
               onClick={() => setZoom((z) => Math.max(0.45, Math.round((z - 0.1) * 100) / 100))}
               data-tooltip="화면 축소"
               data-tooltip-pos="bottom"
-              className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+              className="p-1.5 rounded-full hover:bg-white/[0.08] text-slate-300 transition"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
-            <span className="text-xs font-mono text-slate-300 w-11 text-center">
+            <span className="text-xs font-mono text-slate-200 w-11 text-center">
               {Math.round(zoom * 100)}%
             </span>
             <button
               onClick={() => setZoom((z) => Math.min(1.5, Math.round((z + 0.1) * 100) / 100))}
               data-tooltip="화면 확대"
               data-tooltip-pos="bottom"
-              className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+              className="p-1.5 rounded-full hover:bg-white/[0.08] text-slate-300 transition"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
+              onClick={handleFitView}
+              data-tooltip="전체 장비 노드가 화면에 맞도록 자동 맞춤"
+              data-tooltip-pos="bottom"
+              className="p-1.5 rounded-full hover:bg-white/[0.08] text-slate-300 transition"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+            <button
               onClick={() => {
                 setZoom(0.85);
-                setPan({ x: 10, y: 10 });
+                setPan({ x: 16, y: 64 });
               }}
               data-tooltip="화면 배율 및 위치 초기화"
               data-tooltip-pos="bottom"
-              className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300"
+              className="px-2.5 py-1 rounded-full hover:bg-white/[0.08] text-[11px] text-slate-300 transition"
             >
               리셋
             </button>
+
+            <div className="h-4 w-px bg-white/[0.08] mx-0.5" />
+
+            <button
+              onClick={() => setInspectorOpen((o) => !o)}
+              data-tooltip={inspectorOpen ? '우측 인스펙터 패널 접기' : '우측 인스펙터 패널 열기'}
+              data-tooltip-pos="bottom"
+              className="p-1.5 rounded-full hover:bg-white/[0.08] text-slate-300 transition"
+            >
+              {inspectorOpen ? (
+                <PanelRightClose className="w-3.5 h-3.5 text-sky-300" />
+              ) : (
+                <PanelRightOpen className="w-3.5 h-3.5" />
+              )}
+            </button>
           </div>
         </div>
-
-        {/* Selected Cable Inspector Banner */}
-        {selectedConn && (
-          <div className="bg-slate-900/95 border-b border-cyan-500/40 px-4 py-2 flex items-center justify-between z-20 text-xs whitespace-nowrap">
-            <div className="flex items-center gap-3">
-              <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono font-semibold">
-                선택된 케이블: {selectedConn.connectorFrom}→{selectedConn.connectorTo}
-              </span>
-              <label className="flex items-center gap-1.5 text-slate-300">
-                예상 배선거리(m):
-                <input
-                  type="number"
-                  min={1}
-                  max={300}
-                  value={selectedConn.estimatedLengthMeters}
-                  onChange={(e) =>
-                    onUpdateConnectionLength(selectedConn.id, Math.max(1, Number(e.target.value)))
-                  }
-                  className="w-16 rounded bg-slate-950 border border-slate-700 px-2 py-0.5 text-center font-mono text-cyan-300"
-                />
-                m
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  onDeleteConnection(selectedConn.id);
-                  setSelectedConnId(null);
-                }}
-                className="px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex items-center gap-1"
-              >
-                <Trash2 className="w-3.5 h-3.5" /> 연결선삭제
-              </button>
-              <button
-                onClick={() => setSelectedConnId(null)}
-                className="px-2 py-1 text-slate-400 hover:text-slate-200"
-              >
-                닫기
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Interactive Canvas Area */}
         <div
@@ -655,6 +722,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
             if (e.target === e.currentTarget || (e.target as HTMLElement).dataset.canvasBg === 'true') {
               setWiringStart(null);
               setSelectedConnId(null);
+              setSelectedNodeId(null);
               setIsPanning(true);
               setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
             }
@@ -662,8 +730,9 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
           data-canvas-bg="true"
           className="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing"
           style={{
-            backgroundImage:
-              'radial-gradient(circle, rgba(51, 65, 85, 0.45) 1px, transparent 1px)',
+            backgroundImage: showGrid
+              ? 'radial-gradient(circle, rgba(148, 163, 184, 0.22) 1px, transparent 1px)'
+              : 'none',
             backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
             backgroundPosition: `${pan.x}px ${pan.y}px`,
           }}
@@ -672,14 +741,14 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
           {(toast || rewire) && (
             <div
               onMouseDown={(e) => e.stopPropagation()}
-              className={`absolute top-3 left-1/2 -translate-x-1/2 z-40 px-3.5 py-1.5 rounded-lg border text-xs font-semibold shadow-xl max-w-[80%] ${
+              className={`absolute top-16 left-1/2 -translate-x-1/2 z-40 px-4 py-2 rounded-full border text-xs font-semibold shadow-2xl backdrop-blur-md max-w-[80%] ${
                 rewire
-                  ? 'bg-slate-900/95 border-white/50 text-white'
+                  ? 'bg-[#161C2B]/95 border-white/30 text-white'
                   : toast?.level === 'error'
-                  ? 'bg-rose-950/95 border-rose-500/70 text-rose-100'
+                  ? 'bg-rose-950/90 border-rose-400/50 text-rose-100'
                   : toast?.level === 'info'
-                  ? 'bg-amber-950/95 border-amber-500/70 text-amber-100'
-                  : 'bg-emerald-950/95 border-emerald-500/70 text-emerald-100'
+                  ? 'bg-amber-950/90 border-amber-400/50 text-amber-100'
+                  : 'bg-emerald-950/90 border-emerald-400/50 text-emerald-100'
               }`}
             >
               {rewire
@@ -723,7 +792,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                 <div
                   key={i}
                   style={{ left: zone.x, top: 12, width: zone.w }}
-                  className="absolute border-b border-slate-800/80 pb-1 flex items-baseline justify-between px-1 whitespace-nowrap"
+                  className="absolute border-b border-white/[0.08] pb-1.5 flex items-baseline justify-between px-1 whitespace-nowrap"
                 >
                   <span className="text-[10px] font-mono font-bold tracking-wider text-slate-400">
                     {zone.title}
@@ -797,6 +866,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedConnId(conn.id);
+                        setSelectedNodeId(null);
                       }}
                     >
                       {/* Invisible wide hit path */}
@@ -815,17 +885,17 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                           cx={arc.cx}
                           cy={arc.cy - 1}
                           r={arc.rx + 2.5}
-                          fill="#020617"
-                          stroke="#090d16"
+                          fill="#0B0F17"
+                          stroke="#0B0F17"
                           strokeWidth={2}
                         />
                       ))}
 
-                      {/* Dark Bridge-Separation Backing Halo (Makes Semicircular Jump-Over Bridges `⌒` Crisp) */}
+                      {/* Dark Bridge-Separation Backing Halo */}
                       <path
                         d={pathD}
                         fill="none"
-                        stroke="#090d16"
+                        stroke="#0B0F17"
                         strokeWidth={style.strokeWidth + 3.8}
                         strokeLinejoin="round"
                         strokeLinecap="round"
@@ -855,14 +925,14 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                         />
                       )}
 
-                      {/* Docking snap rings at exact port pins: guarantees 100% pixel-perfect connection alignment */}
+                      {/* Docking snap rings at exact port pins */}
                       {pinA && (
                         <circle
                           cx={pinA.x}
                           cy={pinA.y}
                           r={4}
                           fill={style.color}
-                          stroke="#090d16"
+                          stroke="#0B0F17"
                           strokeWidth={1.5}
                           className="pointer-events-none"
                         />
@@ -873,13 +943,13 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                           cy={pinB.y}
                           r={4.5}
                           fill={style.color}
-                          stroke="#090d16"
+                          stroke="#0B0F17"
                           strokeWidth={1.5}
                           className="pointer-events-none"
                         />
                       )}
 
-                      {/* Draggable endpoint grips: grab a cable end and drop it on another port */}
+                      {/* Draggable endpoint grips */}
                       {[
                         { end: 'from' as const, pin: pinA },
                         { end: 'to' as const, pin: pinB },
@@ -897,6 +967,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                               onMouseDown={(e) => {
                                 e.stopPropagation();
                                 setSelectedConnId(conn.id);
+                                setSelectedNodeId(null);
                                 setWiringStart(null);
                                 setRewire({ connId: conn.id, end });
                               }}
@@ -906,7 +977,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                                 cx={pin.x}
                                 cy={pin.y}
                                 r={6}
-                                fill="#020617"
+                                fill="#0B0F17"
                                 stroke="#ffffff"
                                 strokeWidth={1.6}
                               />
@@ -915,7 +986,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                           )
                       )}
 
-                      {/* Compact Cable Badge (Visible on Hover or Selection to keep canvas clean) */}
+                      {/* Compact Cable Badge */}
                       <g
                         transform={`translate(${badgeX}, ${badgeY})`}
                         className={
@@ -925,12 +996,12 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                         }
                       >
                         <rect
-                          x={-42}
-                          y={-8}
-                          width={84}
-                          height={16}
-                          rx={3.5}
-                          fill="#090d16"
+                          x={-44}
+                          y={-9}
+                          width={88}
+                          height={18}
+                          rx={9}
+                          fill="#111622"
                           fillOpacity={0.95}
                           stroke={style.color}
                           strokeWidth={isSelected ? 1.6 : 1.0}
@@ -1005,27 +1076,34 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
               const outPorts = product.ports.filter((p) => p.direction === 'out');
               const maxPortRows = Math.max(inPorts.length, outPorts.length, 1);
               const artworkH = product.category === 'speaker' ? 82 : 48;
+              const isNodeSelected = selectedNodeId === node.id;
 
-              // Find same-category products so user can swap model directly on the node
               const sameCategoryProducts = catalog.filter((p) => p.category === product.category);
-
-              // Check if this is an amplifier or speaker to show live load badge
               const nodeAmpLoads = ampLoads.filter((a) => a.ampNodeId === node.id);
 
               return (
                 <div
                   key={node.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedNodeId(node.id);
+                    setSelectedConnId(null);
+                  }}
                   style={{
                     left: node.x,
                     top: node.y,
                     width: NODE_WIDTH,
                   }}
-                  className="absolute rounded-lg ring-1 ring-slate-700/90 bg-slate-900/95 shadow-xl select-none z-10 hover:ring-cyan-500/70 transition-shadow"
+                  className={`absolute rounded-2xl bg-[#161C2B]/95 shadow-2xl select-none z-10 transition-shadow ${
+                    isNodeSelected
+                      ? 'ring-2 ring-sky-400/80 shadow-sky-950/40'
+                      : 'ring-1 ring-white/[0.1] hover:ring-sky-400/50'
+                  }`}
                 >
                   {/* Fixed-Height Top Header + SVG Faceplate (Guarantees 0px Pin Coordinate Drift) */}
                   <div
                     style={{ height: getNodeHeaderHeight(product) }}
-                    className="flex flex-col justify-between border-b border-slate-800/80 bg-slate-950/90 rounded-t-lg overflow-hidden"
+                    className="flex flex-col justify-between border-b border-white/[0.08] bg-[#111622]/90 rounded-t-2xl overflow-hidden"
                   >
                     {/* Node Header (Draggable Handle + Model Swap Dropdown + Delete) */}
                     <div
@@ -1037,23 +1115,29 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                           return;
                         }
                         e.stopPropagation();
+                        setSelectedNodeId(node.id);
+                        setSelectedConnId(null);
                         const world = clientToWorld(e.clientX, e.clientY);
                         setDraggingNodeId(node.id);
                         setDragOffset({ x: world.x - node.x, y: world.y - node.y });
                       }}
-                      className="px-2.5 pt-1.5 pb-1 border-b border-slate-800 bg-slate-950/90 cursor-move"
+                      className="px-2.5 pt-1.5 pb-1 border-b border-white/[0.06] bg-[#111622] cursor-move"
                     >
                       <div className="flex items-center justify-between gap-1 mb-1">
                         <input
                           type="text"
                           value={node.customLabel}
                           onChange={(e) => onUpdateNodeLabel(node.id, e.target.value)}
-                          className="bg-transparent text-xs font-bold text-cyan-300 focus:bg-slate-900 focus:outline-none rounded px-1 w-44 truncate"
+                          className="bg-transparent text-xs font-semibold text-sky-300 focus:bg-[#0B0F17] focus:outline-none rounded-md px-1 w-44 truncate"
                           title="클릭하여 장비 호칭 수정"
                         />
                         <button
-                          onClick={() => onDeleteNode(node.id)}
-                          className="text-slate-500 hover:text-rose-400 p-0.5 rounded transition"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (selectedNodeId === node.id) setSelectedNodeId(null);
+                            onDeleteNode(node.id);
+                          }}
+                          className="text-slate-500 hover:text-rose-400 p-0.5 rounded-md transition"
                           title="장비 삭제"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1064,7 +1148,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                       <select
                         value={product.id}
                         onChange={(e) => onSwapNodeProduct(node.id, e.target.value)}
-                        className="w-full rounded bg-slate-900 border border-slate-700/80 px-1.5 py-0.5 text-[10px] font-mono text-slate-200 focus:border-cyan-400 focus:outline-none cursor-pointer"
+                        className="w-full rounded-lg bg-[#0B0F17] border border-white/[0.08] px-1.5 py-0.5 text-[10px] font-mono text-slate-200 focus:border-sky-400/60 focus:outline-none cursor-pointer"
                         title={`${product.name} — 클릭하여 다른 제품 모델로 교체`}
                       >
                         {sameCategoryProducts.map((cand) => (
@@ -1076,7 +1160,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                     </div>
 
                     {/* Realistic SVG Hardware Faceplate */}
-                    <div className="px-2 flex-1 flex items-center justify-center bg-slate-950/50">
+                    <div className="px-2 flex-1 flex items-center justify-center bg-[#0B0F17]/40">
                       <DeviceSvgArtwork product={product} width={236} height={artworkH} />
                     </div>
                   </div>
@@ -1128,7 +1212,7 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                                   if (res.ok) setWiringStart(null);
                                 }
                               }}
-                              className={`relative flex items-center gap-1.5 pl-3 pr-2 py-0.5 rounded-r transition text-left max-w-[126px] ${
+                              className={`relative flex items-center gap-1.5 pl-3 pr-2 py-0.5 rounded-r-lg transition text-left max-w-[126px] ${
                                 rewire && getRewireTargetState(node.id, inPort) === 'ok'
                                   ? 'bg-emerald-500/30 text-emerald-100 ring-1 ring-emerald-400 animate-pulse'
                                   : rewire && getRewireTargetState(node.id, inPort) === 'bad'
@@ -1137,12 +1221,12 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                                   ? 'bg-emerald-500/25 text-emerald-200 ring-1 ring-emerald-400 animate-pulse'
                                   : isWiringMismatchTarget
                                   ? 'opacity-40 hover:bg-rose-500/20'
-                                  : 'hover:bg-slate-800 text-slate-300'
+                                  : 'hover:bg-white/[0.06] text-slate-300'
                               }`}
                               title={`입력 포트: ${inPort.label} (${inPort.connector})`}
                             >
                               <span
-                                className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border border-slate-950"
+                                className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border border-[#0B0F17]"
                                 style={{ left: -5, backgroundColor: getPortPinColor(inPort) }}
                               />
                               <span className="truncate">{inPort.label}</span>
@@ -1173,20 +1257,20 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                                   });
                                 }
                               }}
-                              className={`relative flex items-center justify-end gap-1.5 pl-2 pr-3 py-0.5 rounded-l transition text-right max-w-[126px] ${
+                              className={`relative flex items-center justify-end gap-1.5 pl-2 pr-3 py-0.5 rounded-l-lg transition text-right max-w-[126px] ${
                                 rewire && getRewireTargetState(node.id, outPort) === 'ok'
                                   ? 'bg-emerald-500/30 text-emerald-100 ring-1 ring-emerald-400 animate-pulse'
                                   : rewire && getRewireTargetState(node.id, outPort) === 'bad'
                                   ? 'opacity-35'
                                   : wiringStart?.nodeId === node.id && wiringStart.port.id === outPort.id
-                                  ? 'bg-cyan-500/30 text-cyan-200 ring-1 ring-cyan-400'
-                                  : 'hover:bg-slate-800 text-slate-300'
+                                  ? 'bg-sky-500/30 text-sky-200 ring-1 ring-sky-400'
+                                  : 'hover:bg-white/[0.06] text-slate-300'
                               }`}
                               title={`출력 포트 클릭하여 결선 시작: ${outPort.label} (${outPort.connector})`}
                             >
                               <span className="truncate">{outPort.label}</span>
                               <span
-                                className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border border-slate-950"
+                                className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border border-[#0B0F17]"
                                 style={{ right: -5, backgroundColor: getPortPinColor(outPort) }}
                               />
                             </button>
@@ -1200,17 +1284,17 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
 
                   {/* Amplifier Load Status Pill neatly contained INSIDE Bottom of Amplifier Node */}
                   {nodeAmpLoads.length > 0 && (
-                    <div className="mx-1.5 mb-1.5 bg-slate-950/90 border border-slate-800 rounded p-1.5 space-y-1">
+                    <div className="mx-2 mb-2 bg-[#0B0F17]/90 border border-white/[0.08] rounded-xl p-1.5 space-y-1">
                       {nodeAmpLoads.map((load) => (
                         <div
                           key={load.portId}
-                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded flex items-center justify-between whitespace-nowrap ${
+                          className={`text-[10px] font-mono px-2 py-0.5 rounded-lg flex items-center justify-between whitespace-nowrap ${
                             load.status === 'optimal'
                               ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                               : load.status === 'acceptable'
-                              ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
+                              ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30'
                               : load.status === 'unconnected'
-                              ? 'bg-slate-800/60 text-slate-500'
+                              ? 'bg-white/[0.04] text-slate-500'
                               : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                           }`}
                         >
@@ -1233,10 +1317,10 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
         </div>
 
         {/* BOTTOM AMPLIFIER-SPEAKER IMPEDANCE & POWER MATCHING STATUS BAR */}
-        <div className="border-t border-slate-800 bg-slate-900/95 px-3 py-1.5 z-20 flex items-center gap-3 overflow-x-auto whitespace-nowrap">
+        <div className="border-t border-white/[0.08] bg-[#111622]/95 px-4 py-2 z-20 flex items-center gap-3 overflow-x-auto whitespace-nowrap">
           <span
             data-tooltip="파워앰프 출력 채널별 합성 임피던스(Ω) 및 정격 출력 매칭 상태"
-            className="text-[11px] font-bold text-orange-400 flex items-center gap-1 shrink-0 cursor-help"
+            className="text-[11px] font-semibold text-amber-300 flex items-center gap-1.5 shrink-0 cursor-help"
           >
             <Volume2 className="w-3.5 h-3.5" /> 앰프매칭
           </span>
@@ -1250,12 +1334,12 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
                   <div
                     key={`${load.ampNodeId}_${load.portId}`}
                     data-tooltip={load.statusMessage}
-                    className={`px-2 py-0.5 rounded border text-[11px] font-mono flex items-center gap-1 shrink-0 cursor-help ${
+                    className={`px-2.5 py-0.5 rounded-full border text-[11px] font-mono flex items-center gap-1.5 shrink-0 cursor-help ${
                       load.status === 'optimal'
-                        ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
+                        ? 'bg-emerald-500/15 border-emerald-400/30 text-emerald-200'
                         : load.status === 'acceptable'
-                        ? 'bg-amber-950/50 border-amber-500/40 text-amber-200'
-                        : 'bg-rose-950/70 border-rose-500/50 text-rose-200'
+                        ? 'bg-amber-500/15 border-amber-400/30 text-amber-200'
+                        : 'bg-rose-500/15 border-rose-400/40 text-rose-200'
                     }`}
                   >
                     {load.status === 'optimal' ? (
@@ -1277,6 +1361,252 @@ export const SignalFlowCanvas: React.FC<SignalFlowCanvasProps> = ({
           </div>
         </div>
       </div>
+
+      {/* RIGHT-SIDE NODE / CONNECTION INSPECTOR PANEL */}
+      {inspectorOpen && (
+        <aside className="w-72 shrink-0 border-l border-white/[0.08] bg-[#111622] flex flex-col overflow-y-auto">
+          <div className="p-3.5 border-b border-white/[0.08] flex items-center justify-between">
+            <h3 className="text-xs font-semibold text-slate-100 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-sky-400/15 border border-sky-400/30 flex items-center justify-center text-sky-300">
+                {selectedConn ? (
+                  <Cable className="w-3.5 h-3.5" />
+                ) : selectedNode ? (
+                  <Cpu className="w-3.5 h-3.5" />
+                ) : (
+                  <Info className="w-3.5 h-3.5" />
+                )}
+              </span>
+              {selectedConn
+                ? '케이블 인스펙터'
+                : selectedNode
+                ? '장비 인스펙터'
+                : '스튜디오 인스펙터'}
+            </h3>
+            {(selectedConn || selectedNode) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedConnId(null);
+                  setSelectedNodeId(null);
+                }}
+                className="px-2 py-0.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[10px] text-slate-300 transition"
+              >
+                선택 해제
+              </button>
+            )}
+          </div>
+
+          <div className="p-3.5 space-y-3 flex-1">
+            {selectedConn ? (
+              (() => {
+                const validation = validateConnection(selectedConn, nodes, catalogMap);
+                const style = getCableVisualStyle(selectedConn, nodes, catalogMap, validation.isValid);
+                const fromNode = nodes.find((n) => n.id === selectedConn.fromNodeId);
+                const toNode = nodes.find((n) => n.id === selectedConn.toNodeId);
+
+                return (
+                  <div className="space-y-3">
+                    <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span
+                          className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold border"
+                          style={{
+                            color: style.color,
+                            borderColor: `${style.color}55`,
+                            backgroundColor: `${style.color}18`,
+                          }}
+                        >
+                          {style.typeLabel}
+                        </span>
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                            validation.isValid
+                              ? 'bg-emerald-400/15 text-emerald-300'
+                              : 'bg-rose-400/15 text-rose-300'
+                          }`}
+                        >
+                          {validation.isValid ? '정상 결선' : '신호 오류'}
+                        </span>
+                      </div>
+
+                      <div className="text-xs space-y-1.5 pt-1 border-t border-white/[0.06]">
+                        <div className="flex justify-between gap-2">
+                          <span className="text-slate-400">송신 (OUT)</span>
+                          <span className="font-mono text-slate-200 truncate">
+                            {fromNode?.customLabel || selectedConn.fromNodeId} · {selectedConn.connectorFrom}
+                          </span>
+                        </div>
+                        <div className="flex justify-between gap-2">
+                          <span className="text-slate-400">수신 (IN)</span>
+                          <span className="font-mono text-slate-200 truncate">
+                            {toNode?.customLabel || selectedConn.toNodeId} · {selectedConn.connectorTo}
+                          </span>
+                        </div>
+                      </div>
+
+                      {!validation.isValid && validation.message && (
+                        <div className="rounded-xl bg-rose-500/10 border border-rose-500/30 p-2 text-[11px] text-rose-200">
+                          {validation.message}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3 space-y-2">
+                      <label className="block text-[11px] font-medium text-slate-300">
+                        예상 배선거리 (m)
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={1}
+                          max={300}
+                          value={selectedConn.estimatedLengthMeters}
+                          onChange={(e) =>
+                            onUpdateConnectionLength(
+                              selectedConn.id,
+                              Math.max(1, Number(e.target.value))
+                            )
+                          }
+                          className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.08] px-3 py-1.5 font-mono text-sm text-sky-300 focus:border-sky-400/60 focus:outline-none"
+                        />
+                        <span className="text-xs font-mono text-slate-400">m</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        onDeleteConnection(selectedConn.id);
+                        setSelectedConnId(null);
+                      }}
+                      className="w-full py-2 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> 연결선 삭제
+                    </button>
+                  </div>
+                );
+              })()
+            ) : selectedNode && selectedNodeProduct ? (
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3 space-y-2.5">
+                  <div className="flex justify-center bg-[#0B0F17]/80 rounded-xl py-2 border border-white/[0.05]">
+                    <DeviceSvgArtwork
+                      product={selectedNodeProduct}
+                      width={216}
+                      height={selectedNodeProduct.category === 'speaker' ? 74 : 46}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-slate-400 mb-1">
+                      장비 호칭
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedNode.customLabel}
+                      onChange={(e) => onUpdateNodeLabel(selectedNode.id, e.target.value)}
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.08] px-2.5 py-1.5 text-xs font-semibold text-sky-300 focus:border-sky-400/60 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-slate-400 mb-1">
+                      모델 교체 ({selectedNodeProduct.category})
+                    </label>
+                    <select
+                      value={selectedNodeProduct.id}
+                      onChange={(e) => onSwapNodeProduct(selectedNode.id, e.target.value)}
+                      className="w-full rounded-xl bg-[#0B0F17] border border-white/[0.08] px-2.5 py-1.5 text-[11px] font-mono text-slate-200 focus:border-sky-400/60 focus:outline-none"
+                    >
+                      {catalog
+                        .filter((p) => p.category === selectedNodeProduct.category)
+                        .map((cand) => (
+                          <option key={cand.id} value={cand.id}>
+                            [{cand.brand}] {cand.model}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] border-t border-white/[0.06]">
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">제조사 / 모델</span>
+                      <span className="font-mono text-slate-200">
+                        {selectedNodeProduct.brand} {selectedNodeProduct.model}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-slate-500 block text-[10px]">단가</span>
+                      <span className="font-mono text-sky-300">
+                        ₩{selectedNodeProduct.unitPriceKrw.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3 space-y-1.5">
+                  <div className="text-[11px] font-semibold text-slate-300 mb-1">
+                    포트 구성 (IN {selectedNodeProduct.ports.filter((p) => p.direction === 'in').length} / OUT{' '}
+                    {selectedNodeProduct.ports.filter((p) => p.direction === 'out').length})
+                  </div>
+                  <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
+                    {selectedNodeProduct.ports.map((p) => (
+                      <div
+                        key={p.id}
+                        className="flex items-center justify-between text-[10px] font-mono px-2 py-1 rounded-lg bg-[#0B0F17]/70 border border-white/[0.04]"
+                      >
+                        <span className="flex items-center gap-1.5 text-slate-200 truncate">
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: getPortPinColor(p) }}
+                          />
+                          {p.label}
+                        </span>
+                        <span className="text-slate-400 uppercase shrink-0">
+                          {p.direction} · {p.connector}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    onDeleteNode(selectedNode.id);
+                    setSelectedNodeId(null);
+                  }}
+                  className="w-full py-2 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> 장비 삭제
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3.5 space-y-2.5">
+                  <div className="text-xs font-semibold text-slate-200">계통도 현황</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl bg-[#0B0F17]/80 border border-white/[0.05] p-2.5">
+                      <span className="text-[10px] text-slate-400 block">배치 장비</span>
+                      <span className="text-lg font-mono font-bold text-sky-300">
+                        {nodes.length}
+                      </span>
+                    </div>
+                    <div className="rounded-xl bg-[#0B0F17]/80 border border-white/[0.05] p-2.5">
+                      <span className="text-[10px] text-slate-400 block">연결 케이블</span>
+                      <span className="text-lg font-mono font-bold text-emerald-300">
+                        {connections.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/[0.08] bg-[#161C2B] p-3.5 space-y-2 text-[11px] text-slate-400 leading-relaxed">
+                  <div className="text-xs font-semibold text-slate-200">빠른 조작 안내</div>
+                  <p>• 좌측 라이브러리에서 장비를 드래그하거나 `+` 버튼으로 캔버스에 추가합니다.</p>
+                  <p>• 우측 <strong className="text-sky-300">OUT</strong> 포트를 클릭한 뒤 대상 장비의 <strong className="text-emerald-300">IN</strong> 포트를 클릭해 결선합니다.</p>
+                  <p>• 연결선을 클릭하면 배선 거리 수정 및 삭제가 가능하며, 양 끝점을 드래그해 다른 포트로 재연결할 수 있습니다.</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+      )}
     </div>
   );
 };

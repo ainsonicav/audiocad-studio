@@ -603,34 +603,41 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
-      {/* TOP GLOBAL NAVIGATION & LIVE ENGINEERING KPI HEADER */}
-      <header className="no-print h-12 shrink-0 border-b border-slate-800 bg-slate-950/95 px-4 flex items-center justify-between gap-3 z-30">
-        {/* Brand Logo & Title */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+    <div className="h-screen w-screen flex flex-col bg-[#0B0F17] text-slate-100 overflow-hidden">
+      {/* TOP GLOBAL NAVIGATION & LIVE ENGINEERING KPI HEADER (Material 3 Studio) */}
+      <header className="no-print h-14 shrink-0 border-b border-white/[0.08] bg-[#111622]/95 backdrop-blur-md px-4 lg:px-5 flex items-center justify-between gap-3 z-30">
+        {/* Brand Logo & Active Project Context */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-md shadow-sky-500/20 shrink-0">
             <Volume2 className="w-4 h-4 text-slate-950" />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <h1 className="text-sm font-bold tracking-tight text-white whitespace-nowrap">
               AudioCAD
             </h1>
-            <span className="px-1.5 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/30 text-[10px] font-mono text-cyan-300">
+            <span className="px-2 py-0.5 rounded-full bg-sky-400/12 border border-sky-400/25 text-[10px] font-mono font-semibold text-sky-300 shrink-0">
               PRO
+            </span>
+            <span className="hidden 2xl:inline-block h-3.5 w-px bg-white/[0.1] mx-1 shrink-0" />
+            <span
+              className="hidden 2xl:inline-block text-xs text-slate-400 truncate max-w-[240px]"
+              title={meta.projectName}
+            >
+              {meta.projectName}
             </span>
           </div>
         </div>
 
-        {/* CENTER 3-VIEW SWITCHER TABS */}
-        <nav className="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800">
+        {/* CENTER 3-VIEW PILL SEGMENTED SWITCHER */}
+        <nav className="flex items-center bg-[#161C2B] p-1 rounded-full border border-white/[0.08] shadow-inner">
           <button
             onClick={() => setActiveTab('schematic')}
             data-tooltip="장비 배치 및 포인트투포인트 입출력 직각 결선 계통도"
             data-tooltip-pos="bottom"
-            className={`px-3.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all ${
               activeTab === 'schematic'
-                ? 'bg-cyan-500 text-slate-950 shadow'
-                : 'text-slate-300 hover:text-white'
+                ? 'bg-sky-400 text-slate-950 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <GitBranch className="w-3.5 h-3.5" />
@@ -641,10 +648,10 @@ export const App: React.FC = () => {
             onClick={() => setActiveTab('acoustics')}
             data-tooltip="공간 평면·단면 SPL 음압분포도 및 목표음압·편차 수정제안"
             data-tooltip-pos="bottom"
-            className={`px-3.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all ${
               activeTab === 'acoustics'
-                ? 'bg-orange-500 text-slate-950 shadow'
-                : 'text-slate-300 hover:text-white'
+                ? 'bg-amber-400 text-slate-950 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <Radio className="w-3.5 h-3.5" />
@@ -655,10 +662,10 @@ export const App: React.FC = () => {
             onClick={() => setActiveTab('report')}
             data-tooltip="산출내역서(BOM) 모델 변경 및 2D CAD 도면(PDF 3매) 출력"
             data-tooltip-pos="bottom"
-            className={`px-3.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all ${
               activeTab === 'report'
-                ? 'bg-emerald-500 text-slate-950 shadow'
-                : 'text-slate-300 hover:text-white'
+                ? 'bg-emerald-400 text-slate-950 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -666,25 +673,25 @@ export const App: React.FC = () => {
           </button>
         </nav>
 
-        {/* RIGHT LIVE METRICS & ACTION BUTTONS */}
-        <div className="flex items-center gap-2">
+        {/* RIGHT LIVE METRICS & ACTION PILLS */}
+        <div className="flex items-center gap-2 shrink-0">
           {/* Live SPL, Uniformity & Price Pill */}
           <div
             onClick={() => setActiveTab('acoustics')}
             data-tooltip={`목표 ${room.targetSplDb}dB / 기준편차 ±${room.targetUniformityDb ?? 3.0}dB (클릭 시 음압 시뮬레이터 이동)`}
             data-tooltip-pos="bottom"
-            className="hidden xl:flex items-center gap-2.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-mono whitespace-nowrap cursor-pointer transition"
+            className="hidden xl:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#161C2B] hover:bg-[#1E2638] border border-white/[0.08] text-xs font-mono whitespace-nowrap cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-1">
-              <span className="text-slate-500">평균</span>
-              <strong className="text-cyan-300">{splSummary.avgSplDb}dB</strong>
+              <span className="text-slate-400">평균</span>
+              <strong className="text-sky-300">{splSummary.avgSplDb}dB</strong>
             </div>
-            <span className="text-slate-700">|</span>
+            <span className="text-white/[0.1]">|</span>
             <div className="flex items-center gap-1">
-              <span className="text-slate-500">편차</span>
+              <span className="text-slate-400">편차</span>
               <strong className="text-amber-300">±{splSummary.uniformityPlusMinusDb}dB</strong>
             </div>
-            <span className="text-slate-700">|</span>
+            <span className="text-white/[0.1]">|</span>
             <div className="flex items-center gap-1">
               <strong className="text-emerald-300">₩{totalEquipmentPriceKrw.toLocaleString()}</strong>
             </div>
@@ -694,7 +701,7 @@ export const App: React.FC = () => {
             onClick={() => setIsAutoDesignModalOpen(true)}
             data-tooltip="공간 규격·용도 입력 시 최적 장비 구성 및 결선 자동 생성"
             data-tooltip-pos="bottom"
-            className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 text-xs font-bold flex items-center gap-1 shadow-md shadow-cyan-500/15 whitespace-nowrap transition"
+            className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-sky-400 to-cyan-300 hover:from-sky-300 hover:to-cyan-200 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-md shadow-sky-500/15 whitespace-nowrap transition-all"
           >
             <Wand2 className="w-3.5 h-3.5" /> AI 설계
           </button>
@@ -703,24 +710,24 @@ export const App: React.FC = () => {
             onClick={() => setIsCatalogModalOpen(true)}
             data-tooltip="신규 장비·사양 직접 등록 및 CSV/JSON 제품 목록 일괄 업로드"
             data-tooltip-pos="bottom"
-            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 text-xs font-semibold flex items-center gap-1 whitespace-nowrap transition"
+            className="px-3.5 py-1.5 rounded-full bg-[#161C2B] hover:bg-[#1E2638] border border-white/[0.08] text-slate-100 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors"
           >
-            <Database className="w-3.5 h-3.5 text-cyan-400" /> 장비 DB
+            <Database className="w-3.5 h-3.5 text-sky-400" /> 장비 DB
           </button>
 
           <button
             onClick={() => setIsCloudModalOpen(true)}
-            data-tooltip="클라우드 DB(Supabase) 연동 및 프로젝트 JSON 백업·열기"
+            data-tooltip={`클라우드 DB(Supabase) 연동 및 프로젝트 JSON 백업·열기 (${syncStatusMessage})`}
             data-tooltip-pos="bottom"
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition"
+            className="w-8 h-8 rounded-full bg-[#161C2B] hover:bg-[#1E2638] border border-white/[0.08] text-slate-200 flex items-center justify-center transition-colors"
           >
-            <Cloud className="w-4 h-4 text-cyan-400" />
+            <Cloud className="w-4 h-4 text-sky-400" />
           </button>
         </div>
       </header>
 
       {/* MAIN WORKSPACE CONTENT */}
-      <main className="flex-1 min-h-0 relative overflow-hidden">
+      <main className="flex-1 min-h-0 relative overflow-hidden bg-[#0B0F17]">
         {activeTab === 'schematic' && (
           <SignalFlowCanvas
             catalog={catalog}
