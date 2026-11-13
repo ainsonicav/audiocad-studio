@@ -18,6 +18,7 @@ import {
   ParsedCatalogResult,
 } from '../services/catalogParser';
 import {
+  Camera,
   CheckCircle2,
   Database,
   Download,
@@ -61,6 +62,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
   // 1. BRAND CATALOG FILE / TEXT UPLOAD & AI SPEC PARSER STATE
   // =========================================================================
   const [isParsing, setIsParsing] = useState(false);
+  const [ocrStatus, setOcrStatus] = useState<string | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [parsedResult, setParsedResult] = useState<ParsedCatalogResult | null>(null);
   const [pastedText, setPastedText] = useState('');
@@ -112,19 +114,25 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
 
   const handleCatalogFileSelected = async (file: File) => {
     setIsParsing(true);
+    setOcrStatus(null);
     setParseError(null);
     setUploadedFileName(file.name);
     try {
-      const extractedText = await extractTextFromCatalogFile(file);
+      const extractedText = await extractTextFromCatalogFile(file, (status) => {
+        setOcrStatus(status);
+      });
       if (!extractedText || extractedText.trim().length < 10) {
-        throw new Error('파일에서 읽을 수 있는 텍스트나 사양 데이터를 추출하지 못했습니다.');
+        throw new Error('파일이나 사진에서 읽을 수 있는 텍스트·사양 데이터를 추출하지 못했습니다.');
       }
       const result = parseCatalogText(extractedText, {
         forcedBrand: forcedBrand.trim() || undefined,
         fileName: file.name,
       });
       if (result.products.length === 0) {
-        throw new Error('파일에서 유효한 제품 모델명이나 사양을 찾지 못했습니다. 텍스트 직접 입력 탭에서 복사하여 붙여넣어 보세요.');
+        setPastedText(extractedText);
+        throw new Error(
+          '인식된 텍스트에서 제품 모델명이나 사양을 자동으로 찾지 못했습니다. 오른쪽 텍스트 입력란에 인식된 내용을 채워두었으니 확인 후 다시 분석해 보세요.'
+        );
       }
       setParsedResult(result);
       if (!forcedBrand && result.brandDetected) {
@@ -135,6 +143,7 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
       setParseError(msg);
     } finally {
       setIsParsing(false);
+      setOcrStatus(null);
     }
   };
 
@@ -643,6 +652,9 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
                   📄 PDF 카탈로그 (.pdf)
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-[#111622] border border-white/[0.08] text-slate-200">
+                  📷 사진 / 이미지 OCR (.jpg, .png)
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-[#111622] border border-white/[0.08] text-slate-200">
                   📊 CSV / Excel 표 (.csv, .tsv)
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-[#111622] border border-white/[0.08] text-slate-200">
@@ -677,25 +689,50 @@ export const CatalogManagerModal: React.FC<CatalogManagerModalProps> = ({
               >
                 <input
                   type="file"
-                  accept=".pdf,.csv,.tsv,.txt,.json,.md,.html"
+                  accept=".pdf,.csv,.tsv,.txt,.json,.md,.html,image/*"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) handleCatalogFileSelected(file);
+                    e.target.value = '';
                   }}
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                 />
                 <div className="w-12 h-12 rounded-2xl bg-sky-400/12 border border-sky-400/25 flex items-center justify-center mb-3">
-                  <FileUp className="w-6 h-6 text-sky-400" />
+                  {isParsing ? (
+                    <Loader2 className="w-6 h-6 text-sky-400 animate-spin" />
+                  ) : (
+                    <FileUp className="w-6 h-6 text-sky-400" />
+                  )}
                 </div>
                 <span className="text-sm font-semibold text-slate-100 mb-1">
-                  카탈로그 파일을 여기에 끌어다 놓으세요
+                  {isParsing ? (ocrStatus || '카탈로그 분석 중...') : '카탈로그 파일이나 사진을 끌어다 놓으세요'}
                 </span>
                 <span className="text-xs text-slate-400 mb-3">
-                  또는 클릭하여 내 컴퓨터에서 파일 선택
+                  PDF, CSV, TXT 또는 스펙표/명판 사진 업로드 (한·영 OCR 자동 인식)
                 </span>
-                <span className="px-3.5 py-1 rounded-full bg-[#1E2638] text-sky-300 text-[11px] font-mono border border-white/[0.08]">
-                  {uploadedFileName ? `선택됨: ${uploadedFileName}` : 'PDF / CSV / TXT 파일 선택'}
-                </span>
+                <div className="flex flex-wrap items-center justify-center gap-2 relative z-10">
+                  <span className="px-3.5 py-1 rounded-full bg-[#1E2638] text-sky-300 text-[11px] font-mono border border-white/[0.08]">
+                    {uploadedFileName ? `선택됨: ${uploadedFileName}` : 'PDF / 사진 / CSV 파일 선택'}
+                  </span>
+                  <label
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-[11px] font-semibold border border-emerald-400/30 cursor-pointer transition"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    사진 촬영 / 이미지 선택
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleCatalogFileSelected(file);
+                        e.target.value = '';
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </div>
 
               {/* Right: Direct Text Paste Input */}

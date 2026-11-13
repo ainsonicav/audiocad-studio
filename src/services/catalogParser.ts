@@ -1,3 +1,5 @@
+import * as pdfjsLib from 'pdfjs-dist';
+import Tesseract from 'tesseract.js';
 import {
   AudioProduct,
   EnclosureShape,
@@ -737,10 +739,19 @@ function synthesizeAudioProductFromBlock(
   };
 }
 
+// Configure pdf.js worker for Vite bundler (works in dev and ./ relative base builds)
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).href;
+
 /**
- * Extracts plain text from an uploaded file (handles .txt, .csv, .json, .md, .html, and .pdf binary streams)
+ * Extracts plain text from an uploaded file (handles .txt, .csv, .json, .md, .html, .pdf, and image OCR)
  */
-export async function extractTextFromCatalogFile(file: File): Promise<string> {
+export async function extractTextFromCatalogFile(
+  file: File,
+  onProgress?: (status: string) => void
+): Promise<string> {
   const extension = file.name.split('.').pop()?.toLowerCase() || '';
 
   // Plain text formats
@@ -748,10 +759,18 @@ export async function extractTextFromCatalogFile(file: File): Promise<string> {
     return await file.text();
   }
 
-  // PDF format text extraction via native binary stream inspection
+  // Image formats (camera photo, screenshot, scanned catalog image) via browser OCR
+  if (
+    file.type.startsWith('image/') ||
+    ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif', 'avif', 'tif', 'tiff'].includes(extension)
+  ) {
+    return await extractTextFromImageFile(file, onProgress);
+  }
+
+  // PDF format text extraction via pdfjs-dist (handles FlateDecode, CMap, Korean/Unicode fonts + scanned PDF OCR fallback)
   if (extension === 'pdf') {
     const arrayBuffer = await file.arrayBuffer();
-    return extractTextFromPdfBuffer(arrayBuffer);
+    return await extractTextFromPdfBuffer(arrayBuffer, onProgress);
   }
 
   // Fallback: try reading as UTF-8 text
@@ -762,14 +781,175 @@ export async function extractTextFromCatalogFile(file: File): Promise<string> {
     // ignore
   }
 
-  throw new Error(`지원하지 않는 파일 형식입니다: .${extension} (PDF, CSV, TXT, JSON, MD 지원)`);
+  throw new Error(`지원하지 않는 파일 형식입니다: .${extension} (PDF, 사진/이미지, CSV, TXT, JSON, MD 지원)`);
 }
 
 /**
- * Robust in-browser PDF text stream extractor without heavy third-party dependencies.
- * Extracts text operators (Tj, TJ, string literals) and text blocks (BT ... ET).
+ * Enhances an image on an offscreen canvas (upscale + contrast/grayscale) for better OCR accuracy.
  */
-function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
+async function preprocessImageForOcr(source: File | HTMLCanvasElement): Promise<HTMLCanvasElement> {
+  if (source instanceof HTMLCanvasElement) {
+    return source;
+  }
+
+  const bitmap = await createImageBitmap(source);
+  const maxDim = Math.max(bitmap.width, bitmap.height);
+  // Upscale smaller phone/screenshot images so small spec text is legible to Tesseract
+  const scale = maxDim < 1400 ? Math.min(2.2, 1600 / Math.max(1, maxDim)) : 1;
+  const width = Math.round(bitmap.width * scale);
+  const height = Math.round(bitmap.height * scale);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    bitmap.close();
+    throw new Error('브라우저 캔버스 컨텍스트를 초기화할 수 없습니다.');
+  }
+
+  ctx.filter = 'grayscale(100%) contrast(135%) brightness(105%)';
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+  return canvas;
+}
+
+/**
+ * Runs client-side OCR (English + Korean) on a photographed or uploaded catalog image.
+ */
+async function extractTextFromImageFile(
+  source: File | HTMLCanvasElement,
+  onProgress?: (status: string) => void
+): Promise<string> {
+  onProgress?.('이미지 전처리 중...');
+  const canvas = await preprocessImageForOcr(source);
+
+  onProgress?.('사진 텍스트 인식(OCR) 모델 로딩 중...');
+  const result = await Tesseract.recognize(canvas, 'eng+kor', {
+    logger: (m) => {
+      if (m.status === 'recognizing text' && typeof m.progress === 'number') {
+        onProgress?.(`사진 텍스트 인식(OCR) 중... ${Math.round(m.progress * 100)}%`);
+      } else if (m.status === 'loading language traineddata') {
+        onProgress?.('한/영 OCR 언어 데이터 다운로드 중...');
+      }
+    },
+  });
+
+  return (result.data.text || '').trim();
+}
+
+interface PdfTextChunk {
+  str: string;
+  x: number;
+  y: number;
+}
+
+/**
+ * Extracts structured line-by-line text from a PDF ArrayBuffer using pdfjs-dist,
+ * preserving visual rows and paragraph gaps, with automatic OCR fallback for scanned PDFs.
+ */
+async function extractTextFromPdfBuffer(
+  buffer: ArrayBuffer,
+  onProgress?: (status: string) => void
+): Promise<string> {
+  try {
+    onProgress?.('PDF 문서 분석 중...');
+    const loadingTask = pdfjsLib.getDocument({
+      data: new Uint8Array(buffer),
+      useSystemFonts: true,
+    });
+    const pdf = await loadingTask.promise;
+    const pageTexts: string[] = [];
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const chunks: PdfTextChunk[] = [];
+
+      for (const item of textContent.items) {
+        if ('str' in item && typeof item.str === 'string' && item.str.trim().length > 0) {
+          const transform = (item as { transform?: number[] }).transform;
+          const x = transform ? transform[4] : 0;
+          const y = transform ? transform[5] : 0;
+          chunks.push({ str: item.str, x, y });
+        }
+      }
+
+      // Sort top-to-bottom (descending Y in PDF coordinates), then left-to-right (ascending X)
+      chunks.sort((a, b) => {
+        if (Math.abs(b.y - a.y) > 3) return b.y - a.y;
+        return a.x - b.x;
+      });
+
+      const lines: string[] = [];
+      let currentLineY: number | null = null;
+      let currentLineParts: string[] = [];
+
+      for (const chunk of chunks) {
+        if (currentLineY === null) {
+          currentLineY = chunk.y;
+          currentLineParts.push(chunk.str.trim());
+        } else if (Math.abs(currentLineY - chunk.y) <= 3.5) {
+          currentLineParts.push(chunk.str.trim());
+        } else {
+          lines.push(currentLineParts.join(' '));
+          // Preserve paragraph breaks when vertical gap is large
+          if (currentLineY - chunk.y > 18) {
+            lines.push('');
+          }
+          currentLineY = chunk.y;
+          currentLineParts = [chunk.str.trim()];
+        }
+      }
+
+      if (currentLineParts.length > 0) {
+        lines.push(currentLineParts.join(' '));
+      }
+
+      const pageStr = lines.join('\n').trim();
+      if (pageStr) {
+        pageTexts.push(pageStr);
+      }
+    }
+
+    const combined = pageTexts.join('\n\n').trim();
+    if (combined.length >= 20) {
+      return combined;
+    }
+
+    // Scanned / image-only PDF fallback: render up to first 5 pages and run OCR
+    const ocrPages: string[] = [];
+    const maxOcrPages = Math.min(pdf.numPages, 5);
+    for (let pageNum = 1; pageNum <= maxOcrPages; pageNum++) {
+      onProgress?.(`스캔 PDF 페이지 OCR 인식 중 (${pageNum}/${maxOcrPages})...`);
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2.0 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) continue;
+
+      await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+      const pageOcr = await extractTextFromImageFile(canvas, onProgress);
+      if (pageOcr) ocrPages.push(pageOcr);
+    }
+
+    const ocrCombined = ocrPages.join('\n\n').trim();
+    if (ocrCombined.length > 0) {
+      return ocrCombined;
+    }
+  } catch (err) {
+    console.warn('pdfjs-dist extraction failed, falling back to legacy scanner:', err);
+  }
+
+  return extractTextFromPdfBufferLegacy(buffer);
+}
+
+/**
+ * Legacy fallback PDF text stream scanner for malformed/uncompressed PDFs.
+ */
+function extractTextFromPdfBufferLegacy(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   const decoder = new TextDecoder('latin1');
   const rawString = decoder.decode(bytes);
